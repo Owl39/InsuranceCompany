@@ -41,15 +41,16 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        log.debug("Receive new Update. updateID: " + update.getUpdateId());
-        Long chatId = update.getMessage().getChatId();
+        if (update.hasMessage()) {
+            log.debug("Receive new Update. updateID: " + update.getUpdateId());
+            Long chatId = update.getMessage().getChatId();
 
-        message.setChatId(String.valueOf(chatId));
-        String inputText = update.getMessage().getText();
-        if (inputText.equals("/start")) {
-            log.debug(inputText);
-            createClient(chatId);
-        }
+            message.setChatId(String.valueOf(chatId));
+            String inputText = update.getMessage().getText();
+            if (inputText.equals("/start")) {
+                log.debug(inputText);
+                createClient(chatId);
+            }
 //        TODO 1) сделать путь в случае, если пользователь зарегестрирован ||||
 //         2) В последсвии будет запрос на бд, чтобы узнать админ это или клиент
 //        else
@@ -58,20 +59,24 @@ public class Bot extends TelegramLongPollingBot {
 //         будет выведено кнопки с вариантами задач
 //         https://habr.com/ru/articles/746370/
 //        String data = update.getCallbackQuery().getData();
-        if (inputText.equals("/key")) {
-            log.debug(inputText);
-            try {
-                execute(buttonsPopUp());
-            } catch (TelegramApiException e) {
-                throw new RuntimeException(e);
+            if (inputText.equals("/key")) {
+                printText("Выберете варианты работы");
+                try {
+                    execute(buttonsPopUp());
+                } catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
+                }
             }
-//            if (data.equals("Кнопка1")) {
-//                try {
-//                    execute(printText("111"));
-//                } catch (TelegramApiException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
+        } else if (update.hasCallbackQuery()) {
+            CallbackQuery callbackQuery = update.getCallbackQuery();
+            String data = callbackQuery.getData();
+            if (data.equals("B1")) {
+                try {
+                    execute(printText("111"));
+                } catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 
@@ -90,17 +95,25 @@ public class Bot extends TelegramLongPollingBot {
 
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
-        List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
-        InlineKeyboardButton button1 = new InlineKeyboardButton();
-        button1.setText("Кнопка1");
-//        button1.setUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=0s");
-        button1.setCallbackData("Кнопка1");
-        rowInline1.add(button1);
-
-        rowsInline.add(rowInline1);
+        rowsInline.add(keyboardRows());
 
         markupInline.setKeyboard(rowsInline);
         message.setReplyMarkup(markupInline);
         return message;
+    }
+
+    public List<InlineKeyboardButton> keyboardRows() {
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        row.add(keyboardButtons());
+
+        return row;
+    }
+
+    public InlineKeyboardButton keyboardButtons() {
+        InlineKeyboardButton button = new InlineKeyboardButton();
+        button.setText("Кнопка1");
+//        button.setUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=0s");
+        button.setCallbackData("B1");
+        return button;
     }
 }
