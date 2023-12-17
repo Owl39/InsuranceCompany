@@ -6,21 +6,14 @@ import lombok.SneakyThrows;
 import org.apache.log4j.Logger;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 @AllArgsConstructor
 @NoArgsConstructor
 public class Bot extends TelegramLongPollingBot {
     private static final Logger log = Logger.getLogger(Bot.class);
-    private static final SendMessage message = new SendMessage();
+    public static final SendMessage message = new SendMessage();
     String botName;
     String botToken;
 
@@ -34,22 +27,33 @@ public class Bot extends TelegramLongPollingBot {
         return "6735510509:AAGEk_vrWYGF-o5FcyAzV3pJIsdLNN5V3mg";
     }
 
-    public SendMessage printText(String text) {
-        message.setText(text);
-        return message;
-    }
-
+    @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage()) {
-            log.debug("Receive new Update. updateID: " + update.getUpdateId());
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            log.debug("updateID: " + update.getUpdateId());
             Long chatId = update.getMessage().getChatId();
 
             message.setChatId(String.valueOf(chatId));
             String inputText = update.getMessage().getText();
+
+            InlineKeyboard inlineKeyboard = new InlineKeyboard();
+
             if (inputText.equals("/start")) {
                 log.debug(inputText);
-                createClient(chatId);
+//                TODO Сигнатура для Админа
+//                if (chatId.toString().equals("451627964")) {
+//                    execute(printText("Welcome Admin"));
+//                }
+//              else
+//                TODO Сигнатура для клиента
+//                 --------
+//                 if() - если клиент зарегестрирован, else - если клиент новый
+//                if (chatId.toString().equals("451627964"))
+//                    execute(printText("Welcome Client"));
+//                else
+                log.debug(inputText);
+                execute(inlineKeyboard.buttonsForReg(chatId));
             }
 //        TODO 1) сделать путь в случае, если пользователь зарегестрирован ||||
 //         2) В последсвии будет запрос на бд, чтобы узнать админ это или клиент
@@ -57,63 +61,55 @@ public class Bot extends TelegramLongPollingBot {
 
 //        TODO основная зона отвецтвенности бота, после ввода укоманды /key
 //         будет выведено кнопки с вариантами задач
-//         https://habr.com/ru/articles/746370/
-//        String data = update.getCallbackQuery().getData();
             if (inputText.equals("/key")) {
-                printText("Выберете варианты работы");
-                try {
-                    execute(buttonsPopUp());
-                } catch (TelegramApiException e) {
-                    throw new RuntimeException(e);
-                }
+                log.debug(inputText);
+                execute(inlineKeyboard.buttonsForKey());
+            }
+            if (inputText.equals("/rickroll")) {
+                log.debug(inputText);
+                execute(inlineKeyboard.rickRollMeme());
             }
         } else if (update.hasCallbackQuery()) {
-            CallbackQuery callbackQuery = update.getCallbackQuery();
-            String data = callbackQuery.getData();
-            if (data.equals("B1")) {
-                try {
-                    execute(printText("111"));
-                } catch (TelegramApiException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            log.debug("callBackQueryCheck:" + update.getCallbackQuery());
+            callbackQueryCheck(update);
         }
     }
 
-    //    TODO Вынести в отдельный класс наверное
     @SneakyThrows
-    public void createClient(Long chatId) {
-        execute(printText("Вас приведствует Insurance Company Bot. Ваш персональный id:" + chatId + "\nДля начала работы введите /key"));
-        //        TODO сделать запрос в бд, чтобы внести всю информацию сразу
+    public void callbackQueryCheck(Update update) {
+        message.setReplyMarkup(null);
+        Client client = new Client();
+        String data = update.getCallbackQuery().getData();
+//        if (update.hasMessage() && update.getMessage().hasText()) {
+        if (data.equals("Регистрация")) {
+            log.debug("Регистрация");
+//                String inputText = update.getMessage().getText();
+//                client.createRegistration(inputText);
+            client.createRegistration();
+            execute(printText("Для выбора задач нажмите /key"));
+//            }
+        }
+        if (data.equals("/key")) {
+            InlineKeyboard inlineKeyboard = new InlineKeyboard();
+            execute(inlineKeyboard.buttonsForKey());
+            log.debug("Btn1");
+        }
+        if (data.equals("Btn2")) {
+            log.debug("Btn2");
+            execute(printText("Btn2"));
+        }
+
+        if (data.equals("Btn3")) {
+            log.debug("Btn3");
+            execute(printText("Btn3"));
+        }
+        if (data.equals("rickroll"))
+            log.debug("rickroll");
     }
 
-    @SneakyThrows
-    public SendMessage buttonsPopUp() {
-        printText("Выберете варианты работы");
-
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-
-        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-
-        rowsInline.add(keyboardRows());
-
-        markupInline.setKeyboard(rowsInline);
-        message.setReplyMarkup(markupInline);
+    public SendMessage printText(String text) {
+        message.setText(text);
         return message;
     }
-
-    public List<InlineKeyboardButton> keyboardRows() {
-        List<InlineKeyboardButton> row = new ArrayList<>();
-        row.add(keyboardButtons());
-
-        return row;
-    }
-
-    public InlineKeyboardButton keyboardButtons() {
-        InlineKeyboardButton button = new InlineKeyboardButton();
-        button.setText("Кнопка1");
-//        button.setUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=0s");
-        button.setCallbackData("B1");
-        return button;
-    }
 }
+
