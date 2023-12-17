@@ -53,7 +53,7 @@ public class Bot extends TelegramLongPollingBot {
 //                    execute(printText("Welcome Client"));
 //                else {
                 log.debug(inputText);
-                execute(inlineKeyboard.buttonsForStart(chatId));
+                execute(inlineKeyboard.buttonForStart(chatId));
 //                }
             }
 //        TODO 1) сделать путь в случае, если пользователь зарегестрирован ||||

@@ -39,7 +39,7 @@ public class InlineKeyboard extends Bot{
         return message;
     }
 
-    public SendMessage buttonsForStart(Long chatId) {
+    public SendMessage buttonForStart(Long chatId) {
         message.setText("\uD83D\uDC4B Вас приведствует Insurance Company Bot. Ваш персональный \uD83C\uDD94:" + chatId);
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
 
