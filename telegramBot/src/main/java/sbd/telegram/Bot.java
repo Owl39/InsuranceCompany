@@ -51,9 +51,10 @@ public class Bot extends TelegramLongPollingBot {
 //                 if() - если клиент зарегестрирован, else - если клиент новый
 //                if (chatId.toString().equals("451627964"))
 //                    execute(printText("Welcome Client"));
-//                else
+//                else {
                 log.debug(inputText);
-                execute(inlineKeyboard.buttonsForReg(chatId));
+                execute(inlineKeyboard.buttonsForStart(chatId));
+//                }
             }
 //        TODO 1) сделать путь в случае, если пользователь зарегестрирован ||||
 //         2) В последсвии будет запрос на бд, чтобы узнать админ это или клиент
