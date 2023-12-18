@@ -23,7 +23,7 @@ public class InlineKeyboard extends Bot{
                     row.add(createButton("/key"));
                     break;
                 case 1:
-                    row.add(createButton("Btn2"));
+                    row.add(createButton("Оформити страхування"));
                     break;
                 case 2:
                     row.add(createButton("Btn3"));
@@ -39,8 +39,35 @@ public class InlineKeyboard extends Bot{
         return message;
     }
 
+    @SneakyThrows
+    public SendMessage buttonsForInsurance() {
+        message.setText("Введіть необхідну інформацію:");
+
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        for (int i = 0; i < 1; i++) {
+            switch (i) {
+                case 0:
+                    row.add(createButton("ПІБ"));
+                    break;
+                default:
+                    break;
+            }
+        }
+        rowsInline.add(row);
+
+        markupInline.setKeyboard(rowsInline);
+        message.setReplyMarkup(markupInline);
+        return message;
+    }
+
+
+
     public SendMessage buttonForStart(Long chatId) {
-        message.setText("\uD83D\uDC4B Вас приведствует Insurance Company Bot. Ваш персональный \uD83C\uDD94:" + chatId);
+        message.setText("\uD83D\uDC4B Вас приветствует Insurance Company Bot. Ваш персональный \uD83C\uDD94:" + chatId);
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
 
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();

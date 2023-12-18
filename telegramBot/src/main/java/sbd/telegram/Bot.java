@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
+import org.telegram.telegrambots.meta.api.objects.Message;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -77,12 +77,14 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     @SneakyThrows
-    public void callbackQueryCheck(Update update) {
+    public void callbackQueryCheck(Update update)
+    {
         message.setReplyMarkup(null);
         Client client = new Client();
         String data = update.getCallbackQuery().getData();
-//        if (update.hasMessage() && update.getMessage().hasText()) {
-        if (data.equals("Регистрация")) {
+//
+        if (data.equals("Регистрация"))
+        {
             log.debug("Регистрация");
 //                String inputText = update.getMessage().getText();
 //                client.createRegistration(inputText);
@@ -90,17 +92,32 @@ public class Bot extends TelegramLongPollingBot {
             execute(printText("Для выбора задач нажмите /key"));
 //            }
         }
-        if (data.equals("/key")) {
+        if (data.equals("/key"))
+        {
             InlineKeyboard inlineKeyboard = new InlineKeyboard();
             execute(inlineKeyboard.buttonsForKey());
             log.debug("Btn1");
         }
-        if (data.equals("Btn2")) {
+        if (data.equals("Оформити страхування"))
+        {
+            InlineKeyboard inlineKeyboard = new InlineKeyboard();
             log.debug("Btn2");
-            execute(printText("Btn2"));
+           // execute(inlineKeyboard.buttonsForInsurance());
+           // log.debug("Btn4");
+           /* if (update.hasMessage() && update.getMessage().hasText())
+            {
+                Message message = update.getMessage();
+               String lastReceivedMessage = message.getText();
+               // execute(printText("Received message: " + inputText));
+                execute(printText(lastReceivedMessage));
+            }*/
+
+            execute(printText("После ввода тест"));
+
         }
 
-        if (data.equals("Btn3")) {
+        if (data.equals("Btn3"))
+        {
             log.debug("Btn3");
             execute(printText("Btn3"));
         }

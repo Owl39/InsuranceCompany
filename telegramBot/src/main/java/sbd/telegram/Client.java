@@ -11,7 +11,7 @@ public class Client extends Bot {
     public void createRegistration() {
 //        ПАРСЕР ДЛЯ ВВОДА ФИО
 
-        String inputText = "Cветличный; Станислав; Сергеевич;1234+;";
+        String inputText = "Cветличный; Станислав; Сергеевич; 1234+;";
         String[] splitParts = inputText.split(";");
 
         ArrayList<String> validValues = new ArrayList<>();
