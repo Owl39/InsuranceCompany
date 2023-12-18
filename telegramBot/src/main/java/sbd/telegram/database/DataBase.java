@@ -27,7 +27,7 @@ public class DataBase {
 
     @SneakyThrows
     public static void createDataBase() {
-        statmt = connection.createStatement();
+//        statmt = connection.createStatement();
 //        statmt.execute("CREATE TABLE if not exists 'users' ('id' INTEGER PRIMARY KEY AUTOINCREMENT, 'name' text, 'phone' INT);");
 
         System.out.println("Таблица создана или уже существует.");
@@ -64,8 +64,8 @@ public class DataBase {
     @SneakyThrows
     public static void closeDataBase() {
         connection.close();
-        statmt.close();
-        resSet.close();
+//        statmt.close();
+//        resSet.close();
 
         System.out.println("Соединения закрыты");
     }
