@@ -10,7 +10,7 @@ public class Client {
     public ArrayList<String> createRegistration(String inputText) {
         if (inputText.startsWith("/") || inputText.isEmpty())
             return null;
-        String[] splitParts = inputText.split(";");
+        String[] splitParts = inputText.split(" ");
 
         ArrayList<String> validValues = new ArrayList<>();
 
