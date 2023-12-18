@@ -1,4 +1,4 @@
-package sbd.telegram.bot;
+package sbd.telegram.controllers;
 
 public enum State {
     NONE,
