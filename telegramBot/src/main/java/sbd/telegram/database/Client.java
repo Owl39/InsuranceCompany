@@ -1,4 +1,4 @@
-package sbd.telegram.bd;
+package sbd.telegram.database;
 
 import lombok.SneakyThrows;
 
@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class Client {
     // ПАРСЕР ДЛЯ ВВОДА ФИО
     @SneakyThrows
-    public ArrayList<String> createRegistration(String inputText) {
+    public ArrayList<String> stringParser(String inputText) {
         if (inputText.startsWith("/") || inputText.isEmpty())
             return null;
         String[] splitParts = inputText.split(" ");

@@ -2,7 +2,7 @@ package sbd.telegram.controllers;
 
 import lombok.SneakyThrows;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import sbd.telegram.bd.Client;
+import sbd.telegram.database.Client;
 import sbd.telegram.bot.Bot;
 import sbd.telegram.bot.InlineKeyboard;
 
@@ -57,11 +57,11 @@ public class ButtonsHandlers extends StateHandler {
         // Проверяем, что сообщение пришло от того же пользователя, который начал регистрацию
         if (chatId.equals(currentChatId)) {
             Client client = new Client();
-            if (client.createRegistration(inputText) == null) {
+            if (client.stringParser(inputText) == null) {
                 bot.execute(printText("Вы ввели некоректное значение. Повторите попытку"));
                 currentState = State.WAITING_FOR_REG_INPUT;
             } else {
-                bot.execute(printText("Вы ввели: " + client.createRegistration(inputText) + " +ClientID:" + chatId));
+                bot.execute(printText("Вы ввели: " + client.stringParser(inputText) + " +ClientID:" + chatId));
                 currentState = State.KEY; // Переключаем обратно в начальное состояние
                 bot.execute(printText("Для продолжения /key"));
             }
