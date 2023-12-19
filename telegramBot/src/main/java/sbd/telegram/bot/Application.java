@@ -14,8 +14,8 @@ public class Application {
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
         botsApi.registerBot(new Bot());
 
-//        DataBase.writeDataBase();
-//        DataBase.readDataBase();
+        DataBase.writeTable();
+        DataBase.readTable();
         DataBase.closeDataBase();
     }
 }

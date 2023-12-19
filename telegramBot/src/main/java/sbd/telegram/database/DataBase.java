@@ -2,12 +2,17 @@ package sbd.telegram.database;
 
 import lombok.SneakyThrows;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import java.sql.*;
 
 public class DataBase {
-    private static final String filePath = "/Users/Stas/Documents/!DZ/СБД/InsuranceCompany/";
-    private static final String fileName = "insurancecompanydb";
-    private static final String url = "jdbc:sqlite:C:" + filePath + fileName;
+    private static final String url = "jdbc:sqlite:C:/Users/Danie/Desktop/courseInsurance/insurancecompanydb";
+
     private static Connection connection;
     private static Statement statmt;
     private static ResultSet resSet;
@@ -27,15 +32,16 @@ public class DataBase {
 
     @SneakyThrows
     public static void createDataBase() {
-//        statmt = connection.createStatement();
+        statmt = connection.createStatement();
 //        statmt.execute("CREATE TABLE if not exists 'users' ('id' INTEGER PRIMARY KEY AUTOINCREMENT, 'name' text, 'phone' INT);");
 
         System.out.println("Таблица создана или уже существует.");
     }
 
     // --------Заполнение таблицы--------
-    public static void writeDataBase() {
-//        statmt.execute("INSERT INTO 'users' ('name', 'phone') VALUES ('Petya', 125453); ");
+    @SneakyThrows
+    public static void writeTable() {
+ //       statmt.execute("INSERT INTO client ('clientId', 'fullName', 'email', 'phone') VALUES (123, 'Danylo', 'fff@gmail.com', '+38099'); ");
 //        statmt.execute("INSERT INTO 'users' ('name', 'phone') VALUES ('Vasya', 321789); ");
 //        statmt.execute("INSERT INTO 'users' ('name', 'phone') VALUES ('Masha', 456123); ");
 
@@ -44,19 +50,19 @@ public class DataBase {
 
     // -------- Вывод таблицы--------
     @SneakyThrows
-    public static void readDataBase() {
-//        resSet = statmt.executeQuery("SELECT * FROM users");
+    public static void readTable() {
+        resSet = statmt.executeQuery("SELECT * FROM client");
 
-//        while(resSet.next())
-//        {
-//            int id = resSet.getInt("id");
-//            String  name = resSet.getString("name");
-//            String  phone = resSet.getString("phone");
-//            System.out.println( "ID = " + id );
-//            System.out.println( "name = " + name );
-//            System.out.println( "phone = " + phone );
-//            System.out.println();
-//        }
+       while(resSet.next())
+        {
+            int clientId = resSet.getInt("clientId");
+         //   String  name = resSet.getString("name");
+          //  String  phone = resSet.getString("phone");
+            System.out.println( "ID = " + clientId );
+          //  System.out.println( "name = " + name );
+          //  System.out.println( "phone = " + phone );
+          //  System.out.println();
+        }
 
         System.out.println("Таблица выведена");
     }
