@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 public class Client {
     // ПАРСЕР ДЛЯ ВВОДА ФИО
+
     @SneakyThrows
     public ArrayList<String> stringParser(String inputText, Long chatId) {
         if (inputText.startsWith("/") || inputText.isEmpty())

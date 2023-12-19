@@ -43,6 +43,44 @@ public class InlineKeyboard {
         return message;
     }
 
+    @SneakyThrows
+    public SendMessage buttonsForInsurance(Long userId) {
+
+        message.setText("Оберіть тип страхування:");
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        for (int i = 0; i < 6; i++)
+        {
+            switch (i)
+            {
+                case 1:
+                    row.add(createButton("car"));
+                    break;
+                case 2:
+                    row.add(createButton("medical"));
+                    break;
+                case 3:
+                    row.add(createButton("life"));
+                    break;
+                case 4:
+                    row.add(createButton("real estate"));
+                    break;
+                case 5:
+                    row.add(createButton("business"));
+                    break;
+                default:
+                    break;
+            }
+        }
+        rowsInline.add(row);
+
+        markupInline.setKeyboard(rowsInline);
+        message.setReplyMarkup(markupInline);
+        message.setChatId(userId.toString());
+        return message;
+    }
+
     public InlineKeyboardButton createButton(String text) {
         InlineKeyboardButton button = new InlineKeyboardButton();
         button.setText(text);

@@ -6,11 +6,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-
+import java.util.ArrayList;
 import java.sql.*;
 
 public class DataBase {
-    private static final String url = "jdbc:sqlite:C:/Users/Danie/Desktop/courseInsurance/insurancecompanydb";
+    private static final String url = "jdbc:sqlite:C:/Users/Danie/Desktop/insurance/insurancecompanydb";
 
     private static Connection connection;
     private static Statement statmt;
@@ -39,9 +39,12 @@ public class DataBase {
 
     // --------Заполнение таблицы--------
     @SneakyThrows
-    public static void writeTable() {
- //       statmt.execute("INSERT INTO client ('clientId', 'fullName', 'email', 'phone') VALUES (123, 'Danylo', 'fff@gmail.com', '+38099'); ");
-//        statmt.execute("INSERT INTO 'users' ('name', 'phone') VALUES ('Vasya', 321789); ");
+    public static void writeTable()
+    {
+        String fullName = listOfInputData.get(0) + listOfInputData.get(1) + listOfInputData.get(2);
+        String email = listOfInputData.get(3);
+        String phoneNumber = listOfInputData.get(4);
+        statmt.execute("INSERT INTO client ('clientId', 'fullName', 'email', 'phone') VALUES (123, fullName, email, phoneNumber); ");
 //        statmt.execute("INSERT INTO 'users' ('name', 'phone') VALUES ('Masha', 456123); ");
 
         System.out.println("Таблица заполнена");

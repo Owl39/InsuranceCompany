@@ -68,11 +68,15 @@ public class Bot extends TelegramLongPollingBot {
         }
         if (data.equals("Оформити страхування")) {
             log.debug("Btn2");
-            execute(printText("После ввода тест"));
+            execute(inlineKeyboard.buttonsForInsurance(chatId));
         }
-        if (data.equals("Btn3")) {
+        if (data.equals("Переглянути список активних страхувань")) {
             log.debug("Btn3");
-            execute(printText("Btn3"));
+            execute(printText("Будет список страховок"));
+        }
+        if (data.equals("car")) {
+            //  log.debug("Btn3");
+            execute(printText("нажал car"));
         }
     }
 
