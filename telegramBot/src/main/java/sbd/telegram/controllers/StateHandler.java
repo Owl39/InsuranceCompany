@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import sbd.telegram.bot.Bot;
+import sbd.telegram.bot.InlineKeyboard;
 
 import static sbd.telegram.bot.Bot.log;
 import static sbd.telegram.bot.Bot.message;
@@ -25,7 +26,6 @@ public class StateHandler {
     //    по нему
     @SneakyThrows
     public void handleState(Update update, String inputText, Long chatId) {
-
         switch (buttonsHandlers.currentState) {
             case START:
                 buttonsHandlers.handleStartState(inputText, chatId);
@@ -37,7 +37,7 @@ public class StateHandler {
                 buttonsHandlers.handleRegInput(inputText, chatId);
                 break;
             case KEY:
-                buttonsHandlers.handleKeyState(update, inputText, chatId);
+                buttonsHandlers.handleKeyState(inputText, chatId);
                 break;
             default:
                 break;
@@ -69,20 +69,24 @@ public class StateHandler {
     @SneakyThrows
     public void callbackQueryCheck(Update update) {
         message.setReplyMarkup(null);
+        InlineKeyboard inlineKeyboard = new InlineKeyboard();
         String data = update.getCallbackQuery().getData();
 //        TODO чтобы сделать кнопочки
-//        var userId = update.getCallbackQuery().getFrom().getId();
-        if (data.equals("/key")) {
-            log.debug("/key");
-            bot.execute(printText("123"));
-        }
-        if (data.equals("Оформити страхування")) {
-            log.debug("Btn2");
-            bot.execute(printText("После ввода тест"));
-        }
-        if (data.equals("Btn3")) {
-            log.debug("Btn3");
-            bot.execute(printText("Btn3"));
+        var userId = update.getCallbackQuery().getFrom().getId();
+        if (userId.equals(buttonsHandlers.currentChatId)) {
+            if (data.equals("/key")) {
+                log.debug("/key");
+                bot.execute(printText("123"));
+//            bot.execute(inlineKeyboard.buttonsForKey(userId));
+            }
+            if (data.equals("Оформити страхування")) {
+                log.debug("Btn2");
+                bot.execute(printText("После ввода тест"));
+            }
+            if (data.equals("Btn3")) {
+                log.debug("Btn3");
+                bot.execute(printText("Btn3"));
+            }
         }
     }
 

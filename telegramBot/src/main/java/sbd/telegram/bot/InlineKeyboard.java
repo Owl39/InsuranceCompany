@@ -12,8 +12,7 @@ import java.util.List;
 public class InlineKeyboard {
     public static final SendMessage message = new SendMessage();
     @SneakyThrows
-    public SendMessage buttonsForKey(Update update) {
-        Long chatId = update.getMessage().getChatId();
+    public SendMessage buttonsForKey(Long chatId) {
         message.setText("Выберать вариант работы:");
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
