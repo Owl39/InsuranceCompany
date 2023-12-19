@@ -5,7 +5,6 @@ import lombok.SneakyThrows;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.sql.*;
@@ -21,7 +20,7 @@ public class DataBase {
     public static void connectDataBase() {
         // db parameters
         // create a connection to the database
-        connection = DriverManager.getConnection(url);
+//        connection = DriverManager.getConnection(url);
         System.out.println("Connection to SQLite has been established.");
 //        if (connection != null) {
 //            DatabaseMetaData meta = connection.getMetaData();
@@ -32,7 +31,7 @@ public class DataBase {
 
     @SneakyThrows
     public static void createDataBase() {
-        statmt = connection.createStatement();
+//        statmt = connection.createStatement();
 //        statmt.execute("CREATE TABLE if not exists 'users' ('id' INTEGER PRIMARY KEY AUTOINCREMENT, 'name' text, 'phone' INT);");
 
         System.out.println("Таблица создана или уже существует.");
@@ -51,7 +50,7 @@ public class DataBase {
     // -------- Вывод таблицы--------
     @SneakyThrows
     public static void readTable() {
-        resSet = statmt.executeQuery("SELECT * FROM client");
+//        resSet = statmt.executeQuery("SELECT * FROM client");
 
        while(resSet.next())
         {
@@ -69,7 +68,7 @@ public class DataBase {
 
     @SneakyThrows
     public static void closeDataBase() {
-        connection.close();
+//        connection.close();
 //        statmt.close();
 //        resSet.close();
 

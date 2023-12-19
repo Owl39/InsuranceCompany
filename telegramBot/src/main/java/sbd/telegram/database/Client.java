@@ -3,7 +3,6 @@ package sbd.telegram.database;
 import lombok.SneakyThrows;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class Client {
     // ПАРСЕР ДЛЯ ВВОДА ФИО
@@ -21,10 +20,6 @@ public class Client {
             if (!values.trim().isEmpty())
                 validValues.add(values.trim());
         }
-
-        // Сдвигаем validValues на одну позицию вправо
-//        Collections.rotate(validValues, 1);
-
         return validValues;
     }
 
