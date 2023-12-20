@@ -14,5 +14,4 @@ public class User {
     public User() {
         this.state = State.NONE;
     }
-
 }

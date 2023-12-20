@@ -8,14 +8,9 @@ import sbd.telegram.database.DataBase;
 public class Application {
     @SneakyThrows
     public static void main(String[] args) {
-//        DataBase.connectDataBase();
-//        DataBase.createDataBase();
+        DataBase.connectDataBase();
 
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
         botsApi.registerBot(new Bot());
-
-//        DataBase.writeTable();
-//        DataBase.readTable();
-//        DataBase.closeDataBase();
     }
 }

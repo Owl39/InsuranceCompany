@@ -2,13 +2,13 @@ package sbd.telegram.bot;
 
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.log4j.Logger;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import sbd.telegram.controllers.State;
 import sbd.telegram.controllers.User;
 import sbd.telegram.database.Client;
+import sbd.telegram.database.DataBase;
 
 import java.util.HashMap;
 
@@ -22,7 +22,6 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     public static final SendMessage message = new SendMessage();
-    public static final Logger log = Logger.getLogger(Bot.class);
 
     private String botName = "InsuranceCompanyBot";
     private String botToken = "6735510509:AAGEk_vrWYGF-o5FcyAzV3pJIsdLNN5V3mg";
@@ -41,15 +40,12 @@ public class Bot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            log.debug("updateID: " + update.getUpdateId());
             Long chatId = update.getMessage().getChatId();
             var user = getSession(chatId);
-
             message.setChatId(String.valueOf(chatId));
-            String inputText = update.getMessage().getText();
 
+            String inputText = update.getMessage().getText();
             doUserAction(inputText, user.getChatId());
-            //Перенес ТУДУ в StateHandler
         } else if (update.hasCallbackQuery())
             callbackQueryCheck(update);
     }
@@ -57,26 +53,66 @@ public class Bot extends TelegramLongPollingBot {
     @SneakyThrows
     public void callbackQueryCheck(Update update) {
         message.setReplyMarkup(null);
-        InlineKeyboard inlineKeyboard = new InlineKeyboard();
-        String data = update.getCallbackQuery().getData();
-//        TODO чтобы сделать кнопочки
+        String dataText = update.getCallbackQuery().getData();
         var chatId = update.getCallbackQuery().getFrom().getId();
-        if (data.equals("/key")) {
-            log.debug("/key");
-            execute(printText("123"));
-            execute(inlineKeyboard.buttonsForKey(chatId));
+        InlineKeyboard inlineKeyboard = new InlineKeyboard();
+        doKeyAction(inlineKeyboard, dataText, chatId);
+        doInsuranceAction(inlineKeyboard, dataText, chatId);
+        doForEditUserAction(inlineKeyboard, dataText, chatId);
+    }
+
+    @SneakyThrows
+    private void doKeyAction(InlineKeyboard inlineKeyboard, String dataText, Long chatID) {
+        switch (dataText) {
+            case "Змінити данні акаунту":
+                execute(inlineKeyboard.buttonsForEditUser(chatID));
+                break;
+            case "Переглянути активні страхування":
+                execute(printText("Будет список страховок"));
+                break;
+            case "Оформити страхування":
+                execute(inlineKeyboard.buttonsForInsurance(chatID));
+                break;
+            case "!!!!!Видалити акаунт!!!!!":
+                DataBase.deleteClient(chatID);
+                //                TODO заменить стейт на REG
+                execute(printText("Запись успешно удалена из таблицы client."));
+//                TODO ДОБАВИТЬ ВЫВОД ПРО отцуцтвие записей
+                break;
+            default:
+                break;
         }
-        if (data.equals("Оформити страхування")) {
-            log.debug("Btn2");
-            execute(inlineKeyboard.buttonsForInsurance(chatId));
+    }
+
+    @SneakyThrows
+    private void doInsuranceAction(InlineKeyboard inlineKeyboard, String dataText, Long chatId) {
+        switch (dataText) {
+            case "Car":
+                break;
+            case "Medical":
+                break;
+            case "Life":
+                break;
+            case "Real estate":
+                break;
+            case "Business":
+                break;
+            default:
+                break;
         }
-        if (data.equals("Переглянути список активних страхувань")) {
-            log.debug("Btn3");
-            execute(printText("Будет список страховок"));
-        }
-        if (data.equals("car")) {
-            //  log.debug("Btn3");
-            execute(printText("нажал car"));
+    }
+
+    @SneakyThrows
+    private void doForEditUserAction(InlineKeyboard inlineKeyboard, String dataText, Long chatId) {
+        switch (dataText) {
+            case "Ім'я":
+                break;
+            case "Mail":
+                break;
+            case "Номер телефону":
+                break;
+            default:
+                break;
         }
     }
 
@@ -140,22 +176,31 @@ public class Bot extends TelegramLongPollingBot {
         user.setState(state);
         switch (state) {
             case NONE:
-                execute(printText("Используйте меню:. Для начала нажмите /start"));
+                execute(printText("Используйте меню. Для начала нажмите /start"));
                 break;
             case START:
                 execute(printText(("\uD83D\uDC4B Вас приветствует Insurance Company Bot. Ваш персональный \uD83C\uDD94:" + user.getChatId() + ". Для начала работы введите /reg")));
                 break;
             case REGISTRATION:
-                execute(printText("Введите ваш текст:"));
+                if (!DataBase.findeClientId(user.getChatId()))
+                    execute(printText("Введите ваш текст:"));
+                else {
+                    execute(printText("Зареган /key"));
+                    OnKey(user);
+                }
                 break;
             case KEY:
-                InlineKeyboard inlineKeyboard = new InlineKeyboard();
-                execute(inlineKeyboard.buttonsForKey(user.getChatId()));
+                Client client = new Client();
+                client.clientTable(user.getChatId());
+//                TODO после удаления аккаунта через кноаку нужно пересмотреть логику
+                if (DataBase.findeClientId(user.getChatId())) {
+                    InlineKeyboard inlineKeyboard = new InlineKeyboard();
+                    execute(inlineKeyboard.buttonsForKey(user.getChatId()));
+                }
                 break;
             case HAS_REG_DATA:
                 execute(printText("Для сохранения /key Для изменения /reg"));
                 break;
-
         }
     }
 
@@ -174,7 +219,7 @@ public class Bot extends TelegramLongPollingBot {
         setUserState(user, KEY);
     }
 
-    private SendMessage printText(String text) {
+    public SendMessage printText(String text) {
         message.setText(text);
         return message;
     }
