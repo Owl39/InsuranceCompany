@@ -13,7 +13,7 @@ public class InlineKeyboard {
 
     @SneakyThrows
     public SendMessage buttonsForKey(Long chatId) {
-        message.setText("Выберать вариант работы:");
+        message.setText("Обрати варіант роботи:");
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
 
@@ -54,7 +54,7 @@ public class InlineKeyboard {
 
     @SneakyThrows
     public SendMessage buttonsForInsurance(Long chatId) {
-        message.setText("Оберіть тип страхування:");
+        message.setText("Переглянути інформацію про страхування:");
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
         List<InlineKeyboardButton> row0 = new ArrayList<>();
@@ -92,7 +92,7 @@ public class InlineKeyboard {
     }
 
     public SendMessage buttonsForEditUser(Long chatId) {
-        message.setText("Як даних:");
+        message.setText("Змінити:");
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
         List<InlineKeyboardButton> row = new ArrayList<>();

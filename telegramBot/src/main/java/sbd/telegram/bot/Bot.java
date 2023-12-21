@@ -83,12 +83,12 @@ public class Bot extends TelegramLongPollingBot {
                 if (user.getState() == KEY)
                     execute(inlineKeyboard.buttonsForInsurance(chatId));
                 else
-                    execute(printText("Ваш акаунт не зареэстрований. Щоб продовжити - натисніть /reg"));
+                    execute(printText("Ваш акаунт не зарестрований. Щоб продовжити - натисніть /reg"));
                 break;
             case "!!!!!Видалити акаунт!!!!!":
                 if (DataBase.deleteClient(chatId) > 0) {
                     user.setState(REGISTRATION);
-                    execute(printText("Акакунт видалено успішно. Щоб ввести повторно дані: /reg"));
+                    execute(printText("Акаунт видалено успішно. Щоб ввести повторно дані: /reg"));
                 } else
                     execute(printText("Акаунта не існує. Щоб ввести повторно дані: /reg"));
                 break;
@@ -101,14 +101,20 @@ public class Bot extends TelegramLongPollingBot {
     private void doInsuranceAction(InlineKeyboard inlineKeyboard, String dataText, Long chatId) {
         switch (dataText) {
             case "Car":
+                DataBase.readInsurances(1);
+
                 break;
             case "Medical":
+                DataBase.readInsurances(2);
                 break;
             case "Life":
+                DataBase.readInsurances(3);
                 break;
             case "Real estate":
+                DataBase.readInsurances(4);
                 break;
             case "Business":
+                DataBase.readInsurances(5);
                 break;
             default:
                 break;
@@ -201,7 +207,7 @@ public class Bot extends TelegramLongPollingBot {
                 break;
             case REGISTRATION:
                 if (!DataBase.findClientId(user.getChatId()))
-                    execute(printText("Введіть свої персональні дані в форматі: \n\nпрізвише, ім'я, по батькові, mail, контактний номер телефону "));
+                    execute(printText("Введіть свої персональні дані в форматі: \n\nпрізвище ім'я по-батькові mail телефон "));
                 else {
                     execute(printText("Ви вже зареєстровані. \n\nЩоб перейти в особистий кабінет - натисніть /key"));
                 }

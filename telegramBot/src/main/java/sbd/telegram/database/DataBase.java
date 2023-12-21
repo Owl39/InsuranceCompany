@@ -6,7 +6,7 @@ import sbd.telegram.bot.Bot;
 import java.sql.*;
 
 public class DataBase {
-    private static final String url = "jdbc:sqlite:C:/Users/Stas/Documents/!DZ/СБД/InsuranceCompany/insurancecompanydb";
+    private static final String url = "jdbc:sqlite:C:/Users/Danie/Desktop/lastVersion/insurancecompanydb";
     private static Connection connection;
     private static Statement statmt;
     private static ResultSet resSet;
@@ -61,11 +61,23 @@ public class DataBase {
             String email = resSet.getString("email");
             String phone = resSet.getString("phone");
 
-            bot.execute(bot.printText("Full name = " + fullName));
-            bot.execute(bot.printText("Email = " + email));
-            bot.execute(bot.printText("Phone = " + phone));
+            bot.execute(bot.printText("Full name = " + fullName + "\nEmail = " + email + "\nPhone = " + phone));
         }
-        System.out.println("\nТаблица выведена\n");
+    }
+
+    @SneakyThrows
+    public static void readInsurances(Integer insuranceId)
+    {
+        Bot bot = new Bot();
+        String query = "SELECT insuranceType, monthlyPrice, payoutPercentage FROM insurances WHERE insuranceId = ?";
+        resSet = staticQueryInt(query, insuranceId);
+        while (resSet.next()) {
+            String insuranceType = resSet.getString("insuranceType");
+            String monthlyPrice = resSet.getString("monthlyPrice");
+            String payoutPercentage = resSet.getString("payoutPercentage");
+
+            bot.execute(bot.printText("Тип страхування: " + insuranceType + "\nЦіна за місяць - " + monthlyPrice + "$" + "\nПри страховому випадку покриє " + payoutPercentage + "% від затрат"));
+        }
     }
 
     @SneakyThrows
@@ -79,6 +91,13 @@ public class DataBase {
     private static ResultSet staticQuery(String query, Long chatId) {
         PreparedStatement preparedStatement = connection.prepareStatement(query);
         preparedStatement.setLong(1, chatId);
+        return preparedStatement.executeQuery();
+    }
+
+    @SneakyThrows
+    private static ResultSet staticQueryInt(String query, int insuranceId) {
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setInt(1, insuranceId);
         return preparedStatement.executeQuery();
     }
 }
