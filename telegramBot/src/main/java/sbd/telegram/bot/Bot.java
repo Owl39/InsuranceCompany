@@ -46,8 +46,9 @@ public class Bot extends TelegramLongPollingBot {
 
             String inputText = update.getMessage().getText();
             doUserAction(inputText, user.getChatId());
-        } else if (update.hasCallbackQuery())
+        } else if (update.hasCallbackQuery()) {
             callbackQueryCheck(update);
+        }
     }
 
     @SneakyThrows
@@ -56,28 +57,40 @@ public class Bot extends TelegramLongPollingBot {
         String dataText = update.getCallbackQuery().getData();
         var chatId = update.getCallbackQuery().getFrom().getId();
         InlineKeyboard inlineKeyboard = new InlineKeyboard();
+
         doKeyAction(inlineKeyboard, dataText, chatId);
         doInsuranceAction(inlineKeyboard, dataText, chatId);
         doForEditUserAction(inlineKeyboard, dataText, chatId);
     }
 
     @SneakyThrows
-    private void doKeyAction(InlineKeyboard inlineKeyboard, String dataText, Long chatID) {
+    private void doKeyAction(InlineKeyboard inlineKeyboard, String dataText, Long chatId) {
+        var user = getSession(chatId);
         switch (dataText) {
             case "Змінити данні акаунту":
-                execute(inlineKeyboard.buttonsForEditUser(chatID));
+//                TODO сделать запрос к бд на замену конкретных данных
+                if (user.getState() == KEY)
+                    execute(inlineKeyboard.buttonsForEditUser(chatId));
                 break;
             case "Переглянути активні страхування":
-                execute(printText("Будет список страховок"));
+                if (user.getState() == KEY)
+//                    TODO сделать запрос на чтение данных в бд через внешний ключ insuranceId
+                    execute(printText("Будет список страховок"));
+                else
+                    execute(printText("Ваш акаунт не зареэстрований. Щоб продовжити - натисніть /reg"));
                 break;
             case "Оформити страхування":
-                execute(inlineKeyboard.buttonsForInsurance(chatID));
+                if (user.getState() == KEY)
+                    execute(inlineKeyboard.buttonsForInsurance(chatId));
+                else
+                    execute(printText("Ваш акаунт не зареэстрований. Щоб продовжити - натисніть /reg"));
                 break;
             case "!!!!!Видалити акаунт!!!!!":
-                DataBase.deleteClient(chatID);
-                //                TODO заменить стейт на REG
-                execute(printText("Запись успешно удалена из таблицы client."));
-//                TODO ДОБАВИТЬ ВЫВОД ПРО отцуцтвие записей
+                if (DataBase.deleteClient(chatId) > 0) {
+                    user.setState(REGISTRATION);
+                    execute(printText("Акакунт видалено успішно. Щоб ввести повторно дані: /reg"));
+                } else
+                    execute(printText("Акаунта не існує. Щоб ввести повторно дані: /reg"));
                 break;
             default:
                 break;
@@ -150,11 +163,11 @@ public class Bot extends TelegramLongPollingBot {
         switch (user.getState()) {
             case REGISTRATION:
                 if (currentId.equals(user.getChatId())) {
-                    if (client.stringParser(inputText, user.getChatId()) == null) {
-                        execute(printText("Вы ввели некоректное значение. Повторите попытку"));
+                    if (client.stringParser(inputText) == null) {
+                        execute(printText("Не можна вводити технічні команди, пусту строку, або відхилятися від фоормату вводу! Спробуйте ще раз"));
                         setUserState(user, REGISTRATION);
                     } else {
-                        execute(printText("Вы ввели: " + client.stringParser(inputText, user.getChatId())));
+                        execute(printText("Це ващі дані: " + client.stringParser(inputText)));
                         setUserState(user, HAS_REG_DATA);
                     }
                 }
@@ -166,7 +179,7 @@ public class Bot extends TelegramLongPollingBot {
                 setUserState(user, user.getState());
                 break;
             default:
-                execute(printText("Некоректный ввод"));
+                execute(printText("Error input"));
                 break;
         }
     }
@@ -176,37 +189,44 @@ public class Bot extends TelegramLongPollingBot {
         user.setState(state);
         switch (state) {
             case NONE:
-                execute(printText("Используйте меню. Для начала нажмите /start"));
+                execute(printText("Використовуйте меню або натисніть /start, щоб розпочати"));
                 break;
             case START:
-                execute(printText(("\uD83D\uDC4B Вас приветствует Insurance Company Bot. Ваш персональный \uD83C\uDD94:" + user.getChatId() + ". Для начала работы введите /reg")));
+                if (!DataBase.findClientId(user.getChatId()))
+                    execute(printText(("\uD83D\uDC4B Вас вітає Insurance Company Bot! Ваш персональный \uD83C\uDD94:" + user.getChatId() +
+                            ". \n\nСпочатку треба зареєструватися /reg")));
+                else
+                    execute(printText("\uD83D\uDC4B З поверненням! Вас все ще вітає Insurance Company Bot! Нагадую Ваш персональний \uD83C\uDD94:" + user.getChatId() +
+                            ". \n\nЩоб перейти в особистий кабінет натисніть /key"));
                 break;
             case REGISTRATION:
-                if (!DataBase.findeClientId(user.getChatId()))
-                    execute(printText("Введите ваш текст:"));
+                if (!DataBase.findClientId(user.getChatId()))
+                    execute(printText("Введіть свої персональні дані в форматі: \n\nпрізвише, ім'я, по батькові, mail, контактний номер телефону "));
                 else {
-                    execute(printText("Зареган /key"));
-                    OnKey(user);
+                    execute(printText("Ви вже зареєстровані. \n\nЩоб перейти в особистий кабінет - натисніть /key"));
                 }
                 break;
             case KEY:
                 Client client = new Client();
                 client.clientTable(user.getChatId());
 //                TODO после удаления аккаунта через кноаку нужно пересмотреть логику
-                if (DataBase.findeClientId(user.getChatId())) {
+                if (DataBase.findClientId(user.getChatId())) {
                     InlineKeyboard inlineKeyboard = new InlineKeyboard();
                     execute(inlineKeyboard.buttonsForKey(user.getChatId()));
+                } else {
+                    execute(printText("Ваш акаунт не зареэстрований. \n\nЩоб продовжити - натисніть /reg"));
+                    user.setState(REGISTRATION);
                 }
                 break;
             case HAS_REG_DATA:
-                execute(printText("Для сохранения /key Для изменения /reg"));
+                execute(printText("Для переходу в особистий кабінет та збереження даних - натисніть /key. \n\nЩоб змінити ващі данні - натисніть /reg"));
                 break;
         }
     }
 
     @SneakyThrows
     private void OnStart(User user) {
-        setUserState(user, State.START);
+        setUserState(user, START);
     }
 
     @SneakyThrows

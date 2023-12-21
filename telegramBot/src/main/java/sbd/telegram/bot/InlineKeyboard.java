@@ -41,7 +41,10 @@ public class InlineKeyboard {
                     break;
             }
         }
-        rowsInline.add(row);
+        rowsInline.add(row0);
+        rowsInline.add(row1);
+        rowsInline.add(row2);
+        rowsInline.add(row3);
 
         markupInline.setKeyboard(rowsInline);
         message.setReplyMarkup(markupInline);

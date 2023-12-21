@@ -26,48 +26,34 @@ public class DataBase {
     @SneakyThrows
     public static void writeTable(Long clientId, String firstName, String secondName, String lastName, String email, String phoneNumber) {
         statmt = connection.createStatement();
-        String fullName = firstName + " " + secondName + " " + lastName;
+        String fullName = secondName + " " + firstName + " " + lastName;
         statmt.execute("INSERT INTO client (clientId, fullName, email, phone) VALUES ('" + clientId + "', '" + fullName + "', '" + email +
                 "', '" + phoneNumber + "')");
         System.out.println("Таблица заполнена");
     }
 
     @SneakyThrows
-    public static void deleteClient(Long chatId) {
-        String deleteQuery = "DELETE FROM client WHERE clientId = ?";
-        PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery);
+    public static int deleteClient(Long chatId) {
+        String query = "DELETE FROM client WHERE clientId = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
         preparedStatement.setLong(1, chatId);
-        int rowsAffected = preparedStatement.executeUpdate();
-
-        if (rowsAffected > 0)
-            System.out.println("Запись успешно удалена из таблицы client.");
-        else {
-            System.out.println("Запись с указанным clientId не найдена.");
-        }
+        return preparedStatement.executeUpdate();
     }
 
 
     // -------- Вывод таблицы--------
-//    TODO СДЕЛАТЬ ВОЙД
     @SneakyThrows
     public static void readTable(Long chatId) {
         Bot bot = new Bot();
-
-        resSet = statmt.executeQuery("SELECT * FROM client");
-        System.out.println("\n\n");
-        while (resSet.next()) {
-            int clientId = resSet.getInt("clientId");
-            String fullName = resSet.getString("fullName");
-            String email = resSet.getString("email");
-            String phone = resSet.getString("phone");
-            System.out.println("ID = " + clientId);
-            System.out.println("name = " + fullName);
-            System.out.println("email = " + email);
-            System.out.println("phone = " + phone);
-            System.out.println();
-        }
-
-
+//        resSet = statmt.executeQuery("SELECT * FROM client");
+//        System.out.println("\n\n");
+//        while (resSet.next()) {
+//            int clientId = resSet.getInt("clientId");
+//            String fullName = resSet.getString("fullName");
+//            String email = resSet.getString("email");
+//            String phone = resSet.getString("phone");
+//        }
+//       TODO Вывод для клиента
         String query = "SELECT fullName, email, phone FROM client WHERE clientId = ?";
         resSet = staticQuery(query, chatId);
         while (resSet.next()) {
@@ -78,22 +64,15 @@ public class DataBase {
             bot.execute(bot.printText("Full name = " + fullName));
             bot.execute(bot.printText("Email = " + email));
             bot.execute(bot.printText("Phone = " + phone));
-
-            System.out.println("name = " + fullName);
-            System.out.println("email = " + email);
-            System.out.println("phone = " + phone);
-            System.out.println();
         }
-
         System.out.println("\nТаблица выведена\n");
     }
 
     @SneakyThrows
-    public static boolean findeClientId(Long chatId) {
+    public static boolean findClientId(Long chatId) {
         String query = "SELECT * FROM client WHERE clientId = ?";
         resSet = staticQuery(query, chatId);
         return resSet.next();
-//        return staticQuery(query, chatId) != null;
     }
 
     @SneakyThrows
