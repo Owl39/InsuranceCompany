@@ -52,44 +52,6 @@ public class InlineKeyboard {
         return message;
     }
 
-    public SendMessage buttonsForEditUser(Long chatId) {
-        message.setText("Змінити:");
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            switch (i) {
-                case 0:
-                    row1.add(createButton("Ім'я"));
-                    break;
-                case 1:
-                    row1.add(createButton("Mail"));
-                    break;
-                case 2:
-                    row1.add(createButton("Номер телефону"));
-                    break;
-                case 3:
-                    row2.add(createButton("Видалити поліс"));
-                    break;
-                case 4:
-                    row3.add(createButton("Назад"));
-                    break;
-                default:
-                    break;
-            }
-        }
-        rowsInline.add(row1);
-        rowsInline.add(row2);
-        rowsInline.add(row3);
-
-        markupInline.setKeyboard(rowsInline);
-        message.setReplyMarkup(markupInline);
-        message.setChatId(chatId.toString());
-        return message;
-    }
-
     @SneakyThrows
     public SendMessage buttonsForInsurance(Long chatId) {
         message.setText("Переглянути інформацію про страхування:");
@@ -98,8 +60,7 @@ public class InlineKeyboard {
         List<InlineKeyboardButton> row0 = new ArrayList<>();
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         List<InlineKeyboardButton> row2 = new ArrayList<>();
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 5; i++) {
             switch (i) {
                 case 0:
                     row0.add(createButton("Car"));
@@ -111,13 +72,11 @@ public class InlineKeyboard {
                     row1.add(createButton("Life"));
                     break;
                 case 3:
-                    row1.add(createButton("RealEstate"));
+                    row1.add(createButton("Real estate"));
                     break;
                 case 4:
                     row2.add(createButton("Business"));
                     break;
-                case 5:
-                    row3.add(createButton("Назад"));
                 default:
                     break;
             }
@@ -125,7 +84,6 @@ public class InlineKeyboard {
         rowsInline.add(row0);
         rowsInline.add(row1);
         rowsInline.add(row2);
-        rowsInline.add(row3);
 
         markupInline.setKeyboard(rowsInline);
         message.setReplyMarkup(markupInline);
@@ -133,19 +91,21 @@ public class InlineKeyboard {
         return message;
     }
 
-    @SneakyThrows
-    public SendMessage insurancesIsRelevant(Long chatId) {
-        message.setText("Дана страховка вже існує в списку активних");
+    public SendMessage buttonsForEditUser(Long chatId) {
+        message.setText("Змінити:");
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
         List<InlineKeyboardButton> row = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 3; i++) {
             switch (i) {
                 case 0:
-                    row.add(createButton("Переглянути ще поліси"));
+                    row.add(createButton("Ім'я"));
                     break;
                 case 1:
-                    row.add(createButton("Повернутися в головне меню"));
+                    row.add(createButton("Mail"));
+                    break;
+                case 2:
+                    row.add(createButton("Номер телефону"));
                     break;
                 default:
                     break;
