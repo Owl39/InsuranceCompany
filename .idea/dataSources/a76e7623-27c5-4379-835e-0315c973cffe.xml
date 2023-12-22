@@ -446,7 +446,7 @@
     </routine>
     <schema id="177" parent="1" name="main">
       <Current>1</Current>
-      <LastIntrospectionLocalTimestamp>2023-12-22.00:34:50</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2023-12-21.07:19:26</LastIntrospectionLocalTimestamp>
     </schema>
     <argument id="178" parent="16">
       <ArgumentDirection>R</ArgumentDirection>
@@ -1471,220 +1471,223 @@
     <table id="518" parent="177" name="business"/>
     <table id="519" parent="177" name="car"/>
     <table id="520" parent="177" name="client"/>
-    <table id="521" parent="177" name="insurances"/>
-    <table id="522" parent="177" name="life"/>
-    <table id="523" parent="177" name="medical"/>
-    <table id="524" parent="177" name="realEstate"/>
-    <table id="525" parent="177" name="sqlite_master">
+    <table id="521" parent="177" name="clientAccount"/>
+    <table id="522" parent="177" name="insurances"/>
+    <table id="523" parent="177" name="life"/>
+    <table id="524" parent="177" name="medical"/>
+    <table id="525" parent="177" name="realEstate"/>
+    <table id="526" parent="177" name="sqlite_master">
       <System>1</System>
     </table>
-    <column id="526" parent="518" name="clientId">
+    <column id="527" parent="518" name="insuranceId">
       <DasType>INT|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="527" parent="518" name="fullName">
+    <column id="528" parent="518" name="businessType">
       <DasType>TEXT|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="528" parent="518" name="email">
-      <DasType>TEXT|0s</DasType>
+    <column id="529" parent="518" name="profitability">
+      <DasType>INT|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="529" parent="518" name="phone">
-      <DasType>TEXT|0s</DasType>
-      <Position>4</Position>
-    </column>
     <index id="530" parent="518" name="sqlite_autoindex_business_1">
-      <ColNames>clientId</ColNames>
+      <ColNames>insuranceId</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
     <key id="531" parent="518">
-      <ColNames>clientId</ColNames>
+      <ColNames>insuranceId</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>sqlite_autoindex_business_1</UnderlyingIndexName>
     </key>
-    <column id="532" parent="519" name="clientId">
+    <column id="532" parent="519" name="insuranceId">
       <DasType>INT|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="533" parent="519" name="fullName">
+    <column id="533" parent="519" name="licensePlate">
       <DasType>TEXT|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="534" parent="519" name="email">
-      <DasType>TEXT|0s</DasType>
+    <column id="534" parent="519" name="drivingExperience">
+      <DasType>INT|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="535" parent="519" name="phone">
-      <DasType>TEXT|0s</DasType>
-      <Position>4</Position>
-    </column>
-    <index id="536" parent="519" name="sqlite_autoindex_car_1">
-      <ColNames>clientId</ColNames>
+    <index id="535" parent="519" name="sqlite_autoindex_car_1">
+      <ColNames>insuranceId</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="537" parent="519">
-      <ColNames>clientId</ColNames>
+    <key id="536" parent="519">
+      <ColNames>insuranceId</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>sqlite_autoindex_car_1</UnderlyingIndexName>
     </key>
-    <column id="538" parent="520" name="clientId">
+    <column id="537" parent="520" name="clientId">
       <DasType>INT|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="539" parent="520" name="fullName">
+    <column id="538" parent="520" name="fullName">
       <DasType>TEXT|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="540" parent="520" name="email">
+    <column id="539" parent="520" name="email">
       <DasType>TEXT|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="541" parent="520" name="phone">
+    <column id="540" parent="520" name="phone">
       <DasType>TEXT|0s</DasType>
       <Position>4</Position>
     </column>
-    <column id="542" parent="520" name="insuranceId">
-      <DasType>INT|0s</DasType>
-      <Position>5</Position>
-    </column>
-    <foreign-key id="543" parent="520">
-      <ColNames>insuranceId</ColNames>
-      <RefColNames>insuranceId</RefColNames>
-      <RefTableName>insurances</RefTableName>
-    </foreign-key>
-    <index id="544" parent="520" name="sqlite_autoindex_client_1">
+    <index id="541" parent="520" name="sqlite_autoindex_client_1">
       <ColNames>clientId</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="545" parent="520">
+    <key id="542" parent="520">
       <ColNames>clientId</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>sqlite_autoindex_client_1</UnderlyingIndexName>
     </key>
-    <column id="546" parent="521" name="insuranceId">
+    <column id="543" parent="521" name="clientId">
       <DasType>INT|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="547" parent="521" name="insuranceType">
-      <DasType>VARCHAR(255)|0s</DasType>
+    <column id="544" parent="521" name="paymentInfo">
+      <DasType>TEXT|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="548" parent="521" name="monthlyPrice">
+    <column id="545" parent="521" name="insuranceId">
       <DasType>INT|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="549" parent="521" name="payoutPercentage">
+    <foreign-key id="546" parent="521">
+      <ColNames>insuranceId</ColNames>
+      <RefColNames>insuranceId</RefColNames>
+      <RefTableName>insurances</RefTableName>
+    </foreign-key>
+    <index id="547" parent="521" name="sqlite_autoindex_clientAccount_1">
+      <ColNames>clientId</ColNames>
+      <NameSurrogate>1</NameSurrogate>
+      <Unique>1</Unique>
+    </index>
+    <key id="548" parent="521">
+      <ColNames>clientId</ColNames>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>sqlite_autoindex_clientAccount_1</UnderlyingIndexName>
+    </key>
+    <column id="549" parent="522" name="insuranceId">
+      <DasType>INT|0s</DasType>
+      <Position>1</Position>
+    </column>
+    <column id="550" parent="522" name="insuranceType">
+      <DasType>VARCHAR(255)|0s</DasType>
+      <Position>2</Position>
+    </column>
+    <column id="551" parent="522" name="monthlyPrice">
+      <DasType>INT|0s</DasType>
+      <Position>3</Position>
+    </column>
+    <column id="552" parent="522" name="payoutPercentage">
       <Position>4</Position>
     </column>
-    <index id="550" parent="521" name="sqlite_autoindex_insurances_1">
+    <index id="553" parent="522" name="sqlite_autoindex_insurances_1">
       <ColNames>insuranceId</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="551" parent="521">
+    <key id="554" parent="522">
       <ColNames>insuranceId</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>sqlite_autoindex_insurances_1</UnderlyingIndexName>
     </key>
-    <column id="552" parent="522" name="clientId">
+    <column id="555" parent="523" name="insuranceId">
       <DasType>INT|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="553" parent="522" name="fullName">
+    <column id="556" parent="523" name="beneficiary">
       <DasType>TEXT|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="554" parent="522" name="email">
+    <column id="557" parent="523" name="job">
       <DasType>TEXT|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="555" parent="522" name="phone">
-      <DasType>TEXT|0s</DasType>
-      <Position>4</Position>
-    </column>
-    <index id="556" parent="522" name="sqlite_autoindex_life_1">
-      <ColNames>clientId</ColNames>
+    <index id="558" parent="523" name="sqlite_autoindex_life_1">
+      <ColNames>insuranceId</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="557" parent="522">
-      <ColNames>clientId</ColNames>
+    <key id="559" parent="523">
+      <ColNames>insuranceId</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>sqlite_autoindex_life_1</UnderlyingIndexName>
     </key>
-    <column id="558" parent="523" name="clientId">
+    <column id="560" parent="524" name="insuranceId">
       <DasType>INT|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="559" parent="523" name="fullName">
+    <column id="561" parent="524" name="medicalHistory">
       <DasType>TEXT|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="560" parent="523" name="email">
+    <column id="562" parent="524" name="emergencyContacts">
       <DasType>TEXT|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="561" parent="523" name="phone">
-      <DasType>TEXT|0s</DasType>
-      <Position>4</Position>
-    </column>
-    <index id="562" parent="523" name="sqlite_autoindex_medical_1">
-      <ColNames>clientId</ColNames>
+    <index id="563" parent="524" name="sqlite_autoindex_medical_1">
+      <ColNames>insuranceId</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="563" parent="523">
-      <ColNames>clientId</ColNames>
+    <key id="564" parent="524">
+      <ColNames>insuranceId</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>sqlite_autoindex_medical_1</UnderlyingIndexName>
     </key>
-    <column id="564" parent="524" name="clientId">
+    <column id="565" parent="525" name="insuranceId">
       <DasType>INT|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="565" parent="524" name="fullName">
+    <column id="566" parent="525" name="address">
       <DasType>TEXT|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="566" parent="524" name="email">
-      <DasType>TEXT|0s</DasType>
+    <column id="567" parent="525" name="area">
+      <DasType>INT|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="567" parent="524" name="phone">
+    <column id="568" parent="525" name="propertyType">
       <DasType>TEXT|0s</DasType>
       <Position>4</Position>
     </column>
-    <index id="568" parent="524" name="sqlite_autoindex_realEstate_1">
-      <ColNames>clientId</ColNames>
+    <index id="569" parent="525" name="sqlite_autoindex_realEstate_1">
+      <ColNames>insuranceId</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="569" parent="524">
-      <ColNames>clientId</ColNames>
+    <key id="570" parent="525">
+      <ColNames>insuranceId</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>sqlite_autoindex_realEstate_1</UnderlyingIndexName>
     </key>
-    <column id="570" parent="525" name="type">
+    <column id="571" parent="526" name="type">
       <DasType>TEXT|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="571" parent="525" name="name">
+    <column id="572" parent="526" name="name">
       <DasType>TEXT|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="572" parent="525" name="tbl_name">
+    <column id="573" parent="526" name="tbl_name">
       <DasType>TEXT|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="573" parent="525" name="rootpage">
+    <column id="574" parent="526" name="rootpage">
       <DasType>INT|0s</DasType>
       <Position>4</Position>
     </column>
-    <column id="574" parent="525" name="sql">
+    <column id="575" parent="526" name="sql">
       <DasType>TEXT|0s</DasType>
       <Position>5</Position>
     </column>
