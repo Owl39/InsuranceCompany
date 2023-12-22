@@ -1,15 +1,16 @@
 package sbd.telegram.database;
 
 import lombok.SneakyThrows;
-import sbd.telegram.bot.Bot;
 
 import java.sql.*;
 
 public class DataBase {
-    private static final String url = "jdbc:sqlite:C:/Users/Danie/Desktop/lastVersion/insurancecompanydb";
+    private static final String url = "jdbc:sqlite:C:/Users/Stas/Documents/!DZ/СБД/InsuranceCompany/insurancecompanydb";
     private static Connection connection;
-    private static Statement statmt;
-    private static ResultSet resSet;
+    private Statement statmt;
+    private ResultSet resSet;
+    private String resultString = null;
+    private String query = null;
 
     @SneakyThrows
     public static void connectDataBase() {
@@ -24,27 +25,16 @@ public class DataBase {
 
     // --------Заполнение таблицы--------
     @SneakyThrows
-    public static void writeTable(Long clientId, String firstName, String secondName, String lastName, String email, String phoneNumber) {
+    public void writeTable(Long clientId, String firstName, String secondName, String lastName, String email, String phoneNumber) {
         statmt = connection.createStatement();
         String fullName = secondName + " " + firstName + " " + lastName;
         statmt.execute("INSERT INTO client (clientId, fullName, email, phone) VALUES ('" + clientId + "', '" + fullName + "', '" + email +
                 "', '" + phoneNumber + "')");
-        System.out.println("Таблица заполнена");
     }
-
-    @SneakyThrows
-    public static int deleteClient(Long chatId) {
-        String query = "DELETE FROM client WHERE clientId = ?";
-        PreparedStatement preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setLong(1, chatId);
-        return preparedStatement.executeUpdate();
-    }
-
 
     // -------- Вывод таблицы--------
     @SneakyThrows
-    public static void readTable(Long chatId) {
-        Bot bot = new Bot();
+    public void readTable(Long chatId) {
 //        resSet = statmt.executeQuery("SELECT * FROM client");
 //        System.out.println("\n\n");
 //        while (resSet.next()) {
@@ -61,41 +51,66 @@ public class DataBase {
             String email = resSet.getString("email");
             String phone = resSet.getString("phone");
 
-            bot.execute(bot.printText("Full name = " + fullName + "\nEmail = " + email + "\nPhone = " + phone));
+//            bot.execute(bot.printText("Full name = " + fullName + "\nEmail = " + email + "\nPhone = " + phone));
+//            TODO return
         }
     }
 
     @SneakyThrows
-    public static void readInsurances(Integer insuranceId)
-    {
-        Bot bot = new Bot();
-        String query = "SELECT insuranceType, monthlyPrice, payoutPercentage FROM insurances WHERE insuranceId = ?";
-        resSet = staticQueryInt(query, insuranceId);
+    public String readInsurances(Integer insuranceId) {
+        query = "SELECT insuranceType, monthlyPrice, payoutPercentage FROM insurances WHERE insuranceId = ?";
+        resSet = staticQuerySetInsuranceId(query, insuranceId);
         while (resSet.next()) {
             String insuranceType = resSet.getString("insuranceType");
             String monthlyPrice = resSet.getString("monthlyPrice");
             String payoutPercentage = resSet.getString("payoutPercentage");
 
-            bot.execute(bot.printText("Тип страхування: " + insuranceType + "\nЦіна за місяць - " + monthlyPrice + "$" + "\nПри страховому випадку покриє " + payoutPercentage + "% від затрат"));
+            resultString = ("Тип страхування: " + insuranceType + "\nЦіна за місяць - " + monthlyPrice + "$" + "\nПри страховому випадку покриє " + payoutPercentage + "% від затрат");
         }
+        return resultString;
     }
 
     @SneakyThrows
-    public static boolean findClientId(Long chatId) {
-        String query = "SELECT * FROM client WHERE clientId = ?";
+    public int deleteClient(Long chatId) {
+        query = "DELETE FROM client WHERE clientId = ?";
+        return staticUpdate(query, chatId);
+    }
+
+    @SneakyThrows
+    public void addInsurance(Long chatId, String typeOfInsurance) {
+//        TODO сделать проверку на наличие страховки
+        query = "INSERT INTO  " + typeOfInsurance + " (clientId, fullName, email, phone) SELECT client.clientID, client.fullName, client.email, client.phone FROM client WHERE client.clientId = ?";
+        staticUpdate(query, chatId);
+    }
+
+    public void deleteInsurance(Long chatId, String typeOfInsurance) {
+        query = "DELETE FROM " + typeOfInsurance + " WHERE clientId = ?";
+        staticUpdate(query, chatId);
+    }
+
+    @SneakyThrows
+    public boolean findClientId(Long chatId) {
+        query = "SELECT * FROM client WHERE clientId = ?";
         resSet = staticQuery(query, chatId);
         return resSet.next();
     }
 
     @SneakyThrows
-    private static ResultSet staticQuery(String query, Long chatId) {
+    private ResultSet staticQuery(String query, Long chatId) {
         PreparedStatement preparedStatement = connection.prepareStatement(query);
         preparedStatement.setLong(1, chatId);
         return preparedStatement.executeQuery();
     }
 
     @SneakyThrows
-    private static ResultSet staticQueryInt(String query, int insuranceId) {
+    private int staticUpdate(String query, Long chatId) {
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setLong(1, chatId);
+        return preparedStatement.executeUpdate();
+    }
+
+    @SneakyThrows
+    private ResultSet staticQuerySetInsuranceId(String query, int insuranceId) {
         PreparedStatement preparedStatement = connection.prepareStatement(query);
         preparedStatement.setInt(1, insuranceId);
         return preparedStatement.executeQuery();

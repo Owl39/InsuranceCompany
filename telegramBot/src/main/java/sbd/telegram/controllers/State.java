@@ -6,4 +6,7 @@ public enum State {
     REGISTRATION,
     HAS_REG_DATA,
     KEY,
+    POLICY,
+    BACK,
+    POLICY_DELETE
 }
