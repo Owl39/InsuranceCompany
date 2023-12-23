@@ -92,7 +92,7 @@ public class InlineKeyboard {
     }
 
     @SneakyThrows
-    public SendMessage buttonsForInsurance(Long chatId) {
+    public SendMessage buttonsForInsurance(Long chatId, ArrayList<String> arrayOfTypes) {
         message.setText("Переглянути інформацію про страхування:");
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
@@ -103,19 +103,19 @@ public class InlineKeyboard {
         for (int i = 0; i < arrayOfTypes.size()+1; i++) {
             switch (i) {
                 case 0:
-                    row0.add(createButton("Car"));
+                    row0.add(createButton(arrayOfTypes.get(i)));
                     break;
                 case 1:
-                    row0.add(createButton("Medical"));
+                    row0.add(createButton(arrayOfTypes.get(i)));
                     break;
                 case 2:
-                    row1.add(createButton("Life"));
+                    row1.add(createButton(arrayOfTypes.get(i)));
                     break;
                 case 3:
-                    row1.add(createButton("RealEstate"));
+                    row1.add(createButton(arrayOfTypes.get(i)));
                     break;
                 case 4:
-                    row2.add(createButton("Business"));
+                    row2.add(createButton(arrayOfTypes.get(i)));
                     break;
                 case 5:
                     row3.add(createButton("Повернутися в головне меню"));

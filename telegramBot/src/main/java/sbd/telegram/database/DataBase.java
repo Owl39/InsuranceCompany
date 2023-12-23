@@ -1,13 +1,16 @@
 package sbd.telegram.database;
 
 import lombok.SneakyThrows;
+import redis.clients.jedis.Jedis;
+
+import java.util.Map;
 
 import java.sql.*;
 
 public class DataBase {
     private static final String url = "jdbc:sqlite:C:/Users/Stas/Documents/!DZ/СБД/InsuranceCompany/insurancecompanydb";
     private static Connection connection;
-    private Statement statmt;
+    public static Jedis redisDB;
     private ResultSet resSet;
     private String resultString = null;
     private String query = null;
@@ -18,7 +21,7 @@ public class DataBase {
     }
 
     @SneakyThrows
-    public static void connectDataBase() {
+    public static void connectSQLite() {
         connection = DriverManager.getConnection(url);
         System.out.println("Connection to SQLite has been established.");
         if (connection != null) {
@@ -26,6 +29,12 @@ public class DataBase {
             System.out.println("The driver name is " + meta.getDriverName());
             System.out.println("A new database has been created.");
         }
+    }
+
+    @SneakyThrows
+    public static void connectRedis() {
+        redisDB = new Jedis("redis-14638.c55.eu-central-1-1.ec2.cloud.redislabs.com", 14638);
+        redisDB.auth("iphJnYUL7vUVvzySufTv2fDvrpSLsdMv");
     }
 
     // --------Заполнение таблицы--------
@@ -95,25 +104,52 @@ public class DataBase {
         return resSet.next();
     }
 
-    @SneakyThrows
-    private ResultSet staticQuery(String query, Long chatId) {
-        PreparedStatement preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setLong(1, chatId);
-        return preparedStatement.executeQuery();
+    public int deleteClient(Long chatId) {
+        query = "DELETE FROM client WHERE clientId = ?";
+        return staticUpdate(query, chatId);
     }
 
     @SneakyThrows
-    private int staticUpdate(String query, Long chatId) {
-        PreparedStatement preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setLong(1, chatId);
-        return preparedStatement.executeUpdate();
+    public boolean checkAvailability(Long chatId, String typeOfInsurance) {
+        query = "SELECT 1 FROM " + typeOfInsurance + " WHERE clientId = ?";
+        resSet = staticQuery(query, chatId);
+        return resSet.next();
     }
 
     @SneakyThrows
-    private ResultSet staticQuerySetInsuranceId(String query, int insuranceId) {
-        PreparedStatement preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setInt(1, insuranceId);
-        return preparedStatement.executeQuery();
+    public boolean isAdmin(Long chatId) {
+        return redisDB.exists("worker:" + chatId);
+    }
+
+    @SneakyThrows
+    public int getClientsNumber() {
+        query = "SELECT COUNT(*) FROM client";
+        PreparedStatement statmt = connection.prepareStatement(query);
+        resSet = statmt.executeQuery();
+        resSet.next();
+        return resSet.getInt(1);
+    }
+
+    @SneakyThrows
+    public String showWorker(String key) {
+        Map<String, String> workerInfo = redisDB.hgetAll(key);
+        return resultString = ("Worker ID: " + key.substring(key.lastIndexOf(":") + 1) + "\nFirstname: " + workerInfo.get("firstname") + "\nLastname: " +
+                workerInfo.get("lastname") + "\nPosition: " + workerInfo.get("position") + "\nPhone: " + workerInfo.get("phone"));
+    }
+
+    @SneakyThrows
+    public String showClient() {
+        query = "SELECT * FROM client";
+        PreparedStatement statmt = connection.prepareStatement(query);
+        resSet = statmt.executeQuery();
+
+//        while (resSet.next()) {
+////            String clientId
+//
+//        }
+        resSet.next();
+        return ("Client ID: " + resSet.getInt("clientId") + "\nFull name: " + resSet.getString("fullName") + "\nEmail: " +
+                resSet.getString("email") + "\nPhone: " + resSet.getString("phone"));
     }
 
     @SneakyThrows

@@ -5,6 +5,11 @@ import sbd.telegram.controllers.User;
 import sbd.telegram.database.Client;
 import sbd.telegram.database.DataBase;
 
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
+
 import static sbd.telegram.controllers.UserState.*;
 
 public class ButtonsActions {
@@ -14,6 +19,8 @@ public class ButtonsActions {
     private final DataBase dataBase;
     private final InlineKeyboard inlineKeyboard;
     static String typeName;
+    public final ArrayList<String> arrayOfTypes = new ArrayList<>(Arrays.asList("Car", "Medical", "Life", "RealEstate", "Business"));
+    public static ArrayList<String> arrayOfActiveIns = new ArrayList<>();
 
     public ButtonsActions() {
         this.bot = new Bot();
@@ -35,7 +42,8 @@ public class ButtonsActions {
                 break;
             case "Оформити страхування":
                 if (client.isValidClient(chatId)) {
-                    bot.execute(inlineKeyboard.buttonsForInsurance(chatId));
+                    user.setState(POLICY);
+                    bot.execute(inlineKeyboard.buttonsForInsurance(chatId, arrayOfTypes));
                     flipNoneToKey(user);
                 } else noRegistratedClient(chatId);
                 break;
@@ -68,16 +76,39 @@ public class ButtonsActions {
             case "Номер телефону":
                 break;
             case "Видалити поліс":
-                user.setState(POLICY_DELETE);
-//                TODO getCountAndTypeInsurances должна возвращать количество страховок и тип страховки
-//                dataBase.deleteInsurance(chatId, typeName);
-//                bot.execute(inlineKeyboard.);
+                user.setState(EDIT);
+                setActiveInsurances(chatId);
+                if (!arrayOfActiveIns.isEmpty()) {
+                    user.setState(POLICY_DELETE);
+                    bot.execute(inlineKeyboard.buttonsForActiveInsurance(chatId, arrayOfActiveIns));
+                    arrayOfActiveIns.clear();
+                } else
+                    bot.execute(bot.printText(chatId, "Немає активних страхувань для видалення"));
                 break;
             case "Повернутися в головне меню":
                 bot.onStepBack(user, client);
                 break;
             default:
                 break;
+        }
+    }
+
+    @SneakyThrows
+    public void doDeleteInsurance(String dataText, Long chatId) {
+        for (String type : arrayOfTypes) {
+            if (dataText.equals(type)) {
+                dataBase.deleteInsurance(chatId, type);
+                bot.execute(bot.printText(chatId, "Страховка " + type + " успішно видалена"));
+                break;
+            }
+        }
+    }
+
+    @SneakyThrows
+    public void setActiveInsurances(Long chatId) {
+        for (String arrayOfType : arrayOfTypes) {
+            if (dataBase.checkAvailability(chatId, arrayOfType))
+                arrayOfActiveIns.add(arrayOfType);
         }
     }
 
@@ -122,18 +153,18 @@ public class ButtonsActions {
         Long chatId = user.getChatId();
         switch (dataText) {
             case "Додати поліс":
-//                    TODO СДЕЛАТЬ ПРОВЕРКУ СПИСКА ПОЛИСОВ - ЕСЛИ ТАКОЙ УЖЕ ЕСТЬ - СКИП
                 onPolicy(user);
                 if (!dataBase.checkAvailability(chatId, typeName.toLowerCase())) {
                     dataBase.addInsurance(chatId, typeName.toLowerCase());
-                    bot.execute(bot.printText(chatId, "Тип страховки " + typeName + " успішно добавлено список Ваших активних полісів"));
+                    bot.execute(bot.printText(chatId, "Тип страховки " + typeName + " успішно додано в список Ваших активних полісів"));
                     Thread.sleep(1000);
-                    bot.execute(inlineKeyboard.buttonsForInsurance(user.getChatId()));
+                    bot.execute(inlineKeyboard.buttonsForInsurance(user.getChatId(), arrayOfTypes));
                 } else
                     bot.execute(inlineKeyboard.insurancesIsRelevant(chatId, user.getState()));
                 break;
             case "Переглянути ще поліси":
-                bot.execute(inlineKeyboard.buttonsForInsurance(chatId));
+                bot.execute(inlineKeyboard.buttonsForInsurance(chatId, arrayOfTypes));
+                user.setState(POLICY);
                 break;
             case "Повернутися в головне меню":
                 bot.onStepBack(user, client);
@@ -152,7 +183,7 @@ public class ButtonsActions {
 
     @SneakyThrows
     public void noRegistratedClient(Long chatId) {
-        bot.execute(bot.printText(chatId, "Ваш акаунт не зареэстрований. Щоб продовжити - натисніть /reg"));
+        bot.execute(bot.printText(chatId, "Ваш акаунт не зареєстрований. Щоб продовжити - натисніть /reg"));
     }
 
     @SneakyThrows

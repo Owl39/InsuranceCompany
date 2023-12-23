@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import sbd.telegram.controllers.User;
 import sbd.telegram.database.Client;
+import sbd.telegram.database.DataBase;
 
 import java.util.HashMap;
 
@@ -113,7 +114,7 @@ public class Bot extends TelegramLongPollingBot {
                 execute(printText(chatId, "Не можна вводити технічні команди, пусту строку, або відхилятися від фоормату вводу! Спробуйте ще раз"));
                 user.setState(REGISTRATION);
             } else {
-                execute(printText(currentId, "Це ващі дані: " + client.stringParser(inputText)));
+                execute(printText(chatId, "Це ваші дані: " + client.stringParser(inputText)));
                 OnHasRegData(user);
             }
         }

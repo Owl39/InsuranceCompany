@@ -53,5 +53,11 @@
             <artifactId>telegrambots</artifactId>
             <version>5.2.0</version>
         </dependency>
+
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>3.8.0</version>
+            </dependency>
     </dependencies>
 </project>
