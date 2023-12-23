@@ -1,8 +1,6 @@
 package sbd.telegram.database;
 
 import lombok.SneakyThrows;
-import sbd.telegram.bot.Bot;
-import sbd.telegram.bot.ButtonsActions;
 
 import java.util.ArrayList;
 
@@ -12,17 +10,10 @@ public class Client {
     private static String lastName;
     private static String mail;
     private static String phoneNumber;
-    private DataBase dataBase;
-    private Bot bot;
-    private ButtonsActions buttonsActions;
+    DataBase dataBase;
 
     public Client() {
         this.dataBase = new DataBase();
-        this.bot = new Bot();
-//        this.bot = new Bot(new ButtonsActions(null, dataBase, this));
-//        (new ButtonsActions(this.dataBase));
-//        this.buttonsActions = new ButtonsActions(bot, dataBase, this);
-//         // Передача Client и ButtonsActions в Bot
     }
 
     @SneakyThrows

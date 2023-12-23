@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import sbd.telegram.controllers.UserState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,33 +57,33 @@ public class InlineKeyboard {
         message.setText("Змінити:");
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        List<InlineKeyboardButton> row0 = new ArrayList<>();
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         List<InlineKeyboardButton> row2 = new ArrayList<>();
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             switch (i) {
                 case 0:
-                    row1.add(createButton("Ім'я"));
+                    row0.add(createButton("Ім'я"));
                     break;
                 case 1:
-                    row1.add(createButton("Mail"));
+                    row0.add(createButton("Mail"));
                     break;
                 case 2:
-                    row1.add(createButton("Номер телефону"));
+                    row0.add(createButton("Номер телефону"));
                     break;
                 case 3:
-                    row2.add(createButton("Видалити поліс"));
+                    row1.add(createButton("Видалити поліс"));
                     break;
                 case 4:
-                    row3.add(createButton("Назад"));
+                    row2.add(createButton("Повернутися в головне меню"));
                     break;
                 default:
                     break;
             }
         }
+        rowsInline.add(row0);
         rowsInline.add(row1);
         rowsInline.add(row2);
-        rowsInline.add(row3);
 
         markupInline.setKeyboard(rowsInline);
         message.setReplyMarkup(markupInline);
@@ -99,7 +100,7 @@ public class InlineKeyboard {
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         List<InlineKeyboardButton> row2 = new ArrayList<>();
         List<InlineKeyboardButton> row3 = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < arrayOfTypes.size()+1; i++) {
             switch (i) {
                 case 0:
                     row0.add(createButton("Car"));
@@ -117,7 +118,7 @@ public class InlineKeyboard {
                     row2.add(createButton("Business"));
                     break;
                 case 5:
-                    row3.add(createButton("Назад"));
+                    row3.add(createButton("Повернутися в головне меню"));
                 default:
                     break;
             }
@@ -134,8 +135,11 @@ public class InlineKeyboard {
     }
 
     @SneakyThrows
-    public SendMessage insurancesIsRelevant(Long chatId) {
-        message.setText("Дана страховка вже існує в списку активних");
+    public SendMessage insurancesIsRelevant(Long chatId, UserState state) {
+        if (UserState.POLICY_CHECK == state)
+            message.setText("Переглянути ще варіанти полісів?");
+        else
+            message.setText("Дана страховка вже існує в списку активних");
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
         List<InlineKeyboardButton> row = new ArrayList<>();
@@ -152,6 +156,84 @@ public class InlineKeyboard {
             }
         }
         rowsInline.add(row);
+
+        markupInline.setKeyboard(rowsInline);
+        message.setReplyMarkup(markupInline);
+        message.setChatId(chatId.toString());
+        return message;
+    }
+
+    @SneakyThrows
+    public SendMessage buttonsForAddingInsurance(Long chatId) {
+        message.setText("Оберіть функцію:");
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            switch (i) {
+                case 0:
+                    row.add(createButton("Додати поліс"));
+                    break;
+                case 1:
+                    row.add(createButton("Повернутися в головне меню"));
+                    break;
+                default:
+                    break;
+            }
+        }
+        rowsInline.add(row);
+
+        markupInline.setKeyboard(rowsInline);
+        message.setReplyMarkup(markupInline);
+        message.setChatId(chatId.toString());
+        return message;
+    }
+
+    @SneakyThrows
+    public SendMessage buttonsForActiveInsurance(Long chatId, ArrayList<String> arrayOfTypes) {
+        message.setText("Оберіть страховку, яку видалити:");
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        List<InlineKeyboardButton> row0 = new ArrayList<>();
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        for (String type : arrayOfTypes)
+            row0.add(createButton(type));
+        row1.add(createButton("Повернутися в головне меню"));
+        rowsInline.add(row0);
+        rowsInline.add(row1);
+
+        markupInline.setKeyboard(rowsInline);
+        message.setReplyMarkup(markupInline);
+        message.setChatId(chatId.toString());
+        return message;
+    }
+
+    @SneakyThrows
+    public SendMessage buttonsForAdminKey(Long chatId) {
+        message.setText("Оберіть функцію:");
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        List<InlineKeyboardButton> row0 = new ArrayList<>();
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            switch (i) {
+                case 0:
+                    row0.add(createButton("Інформація про працівників"));
+                    break;
+                case 1:
+                    row1.add(createButton("Інформація про клієнтів"));
+                    break;
+                case 2:
+                    row2.add(createButton("Інформація про клієнта"));
+                    break;
+                default:
+                    break;
+            }
+        }
+        rowsInline.add(row0);
+        rowsInline.add(row1);
+        rowsInline.add(row2);
 
         markupInline.setKeyboard(rowsInline);
         message.setReplyMarkup(markupInline);

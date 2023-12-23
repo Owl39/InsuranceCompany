@@ -11,6 +11,11 @@ public class DataBase {
     private ResultSet resSet;
     private String resultString = null;
     private String query = null;
+    private final Insurance insurance;
+
+    public DataBase() {
+        this.insurance = new Insurance();
+    }
 
     @SneakyThrows
     public static void connectDataBase() {
@@ -26,7 +31,7 @@ public class DataBase {
     // --------Заполнение таблицы--------
     @SneakyThrows
     public void writeTable(Long clientId, String firstName, String secondName, String lastName, String email, String phoneNumber) {
-        statmt = connection.createStatement();
+        Statement statmt = connection.createStatement();
         String fullName = secondName + " " + firstName + " " + lastName;
         statmt.execute("INSERT INTO client (clientId, fullName, email, phone) VALUES ('" + clientId + "', '" + fullName + "', '" + email +
                 "', '" + phoneNumber + "')");
@@ -35,14 +40,6 @@ public class DataBase {
     // -------- Вывод таблицы--------
     @SneakyThrows
     public void readTable(Long chatId) {
-//        resSet = statmt.executeQuery("SELECT * FROM client");
-//        System.out.println("\n\n");
-//        while (resSet.next()) {
-//            int clientId = resSet.getInt("clientId");
-//            String fullName = resSet.getString("fullName");
-//            String email = resSet.getString("email");
-//            String phone = resSet.getString("phone");
-//        }
 //       TODO Вывод для клиента
         String query = "SELECT fullName, email, phone FROM client WHERE clientId = ?";
         resSet = staticQuery(query, chatId);
@@ -55,32 +52,35 @@ public class DataBase {
 //            TODO return
         }
     }
+//
+//    @SneakyThrows
+//    public void getOneClient(Long chatId) {
+//        resSet = statmt.executeQuery("SELECT * FROM client");
+//        while (resSet.next()) {
+//            int clientId = resSet.getInt("clientId");
+//            String fullName = resSet.getString("fullName");
+//            String email = resSet.getString("email");
+//            String phone = resSet.getString("phone");
+//        }
+//    }
+
+    public void addInsurance(Long chatId, String typeOfInsurance) {
+//        TODO сделать проверку на наличие страховки
+        query = "INSERT INTO  " + typeOfInsurance + " (clientId, fullName, email, phone) SELECT client.clientID, client.fullName, client.email, client.phone FROM client WHERE client.clientId = ?";
+        staticUpdate(query, chatId);
+    }
 
     @SneakyThrows
     public String readInsurances(Integer insuranceId) {
         query = "SELECT insuranceType, monthlyPrice, payoutPercentage FROM insurances WHERE insuranceId = ?";
         resSet = staticQuerySetInsuranceId(query, insuranceId);
         while (resSet.next()) {
-            String insuranceType = resSet.getString("insuranceType");
-            String monthlyPrice = resSet.getString("monthlyPrice");
-            String payoutPercentage = resSet.getString("payoutPercentage");
-
-            resultString = ("Тип страхування: " + insuranceType + "\nЦіна за місяць - " + monthlyPrice + "$" + "\nПри страховому випадку покриє " + payoutPercentage + "% від затрат");
+            insurance.setInsuranceType(resSet.getString("insuranceType"));
+            insurance.setPayoutPercentage(resSet.getString("monthlyPrice"));
+            insurance.setMonthlyPrice(resSet.getString("payoutPercentage"));
+            resultString = ("Тип страхування: " + insurance.getInsuranceType() + "\nЦіна за місяць - " + insurance.getMonthlyPrice() + "$" + "\nПри страховому випадку покриє " + insurance.getPayoutPercentage() + "% від затрат");
         }
         return resultString;
-    }
-
-    @SneakyThrows
-    public int deleteClient(Long chatId) {
-        query = "DELETE FROM client WHERE clientId = ?";
-        return staticUpdate(query, chatId);
-    }
-
-    @SneakyThrows
-    public void addInsurance(Long chatId, String typeOfInsurance) {
-//        TODO сделать проверку на наличие страховки
-        query = "INSERT INTO  " + typeOfInsurance + " (clientId, fullName, email, phone) SELECT client.clientID, client.fullName, client.email, client.phone FROM client WHERE client.clientId = ?";
-        staticUpdate(query, chatId);
     }
 
     public void deleteInsurance(Long chatId, String typeOfInsurance) {
@@ -93,6 +93,27 @@ public class DataBase {
         query = "SELECT * FROM client WHERE clientId = ?";
         resSet = staticQuery(query, chatId);
         return resSet.next();
+    }
+
+    @SneakyThrows
+    private ResultSet staticQuery(String query, Long chatId) {
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setLong(1, chatId);
+        return preparedStatement.executeQuery();
+    }
+
+    @SneakyThrows
+    private int staticUpdate(String query, Long chatId) {
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setLong(1, chatId);
+        return preparedStatement.executeUpdate();
+    }
+
+    @SneakyThrows
+    private ResultSet staticQuerySetInsuranceId(String query, int insuranceId) {
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setInt(1, insuranceId);
+        return preparedStatement.executeQuery();
     }
 
     @SneakyThrows
