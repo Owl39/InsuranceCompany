@@ -8,7 +8,7 @@ import java.util.Map;
 import java.sql.*;
 
 public class DataBase {
-    private static final String url = "jdbc:sqlite:C:/Users/Stas/Documents/!DZ/СБД/InsuranceCompany/insurancecompanydb";
+    private static final String url = "jdbc:sqlite:C:/Users/Danie/Desktop/from1223/insurancecompanydb";
     private static Connection connection;
     public static Jedis redisDB;
     private ResultSet resSet;
@@ -134,20 +134,19 @@ public class DataBase {
     public String showWorker(String key) {
         Map<String, String> workerInfo = redisDB.hgetAll(key);
         return resultString = ("Worker ID: " + key.substring(key.lastIndexOf(":") + 1) + "\nFirstname: " + workerInfo.get("firstname") + "\nLastname: " +
-                workerInfo.get("lastname") + "\nPosition: " + workerInfo.get("position") + "\nPhone: " + workerInfo.get("phone"));
+                workerInfo.get("lastname") + "\nPosition: " + workerInfo.get("position") + "\nPhone: " + workerInfo.get("phone") + "\nSalary: " + workerInfo.get("salary"));
     }
+   // SORT worker:* BY worker:*->salary DESC GET worker:*->firstname GET worker:*->lastname GET worker:*->position GET worker:*->phone GET worker:*->salary
 
     @SneakyThrows
-    public String showClient() {
+    public String showClient(int i) {
         query = "SELECT * FROM client";
         PreparedStatement statmt = connection.prepareStatement(query);
         resSet = statmt.executeQuery();
-
-//        while (resSet.next()) {
-////            String clientId
-//
-//        }
-        resSet.next();
+        while(i > 0) {
+            resSet.next();
+            --i;
+        }
         return ("Client ID: " + resSet.getInt("clientId") + "\nFull name: " + resSet.getString("fullName") + "\nEmail: " +
                 resSet.getString("email") + "\nPhone: " + resSet.getString("phone"));
     }

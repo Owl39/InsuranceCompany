@@ -192,6 +192,7 @@ public class ButtonsActions {
         DataBase dataBase = new DataBase();
         switch (dataText) {
             case "Інформація про працівників":
+                bot.execute(bot.printText(chatId, "Інформація про працівників (відсортована по розміру зарплатні(пока нет, делаю))"));
                 Set<String> keys = DataBase.redisDB.keys("worker:*");
                 ArrayList<String> workers = new ArrayList<>();
                 for (String key : keys)
@@ -201,7 +202,7 @@ public class ButtonsActions {
             case "Інформація про клієнтів":
                 ArrayList<String> clients = new ArrayList<>();
                 for (int i = 0; i < dataBase.getClientsNumber(); i++)
-                    clients.add(dataBase.showClient());
+                    clients.add(dataBase.showClient(i + 1));
                 for (int i = 0; i < clients.size(); i++)
                     bot.execute(bot.printText(chatId, clients.get(i)));
                 break;
