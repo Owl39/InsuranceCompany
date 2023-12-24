@@ -1,19 +1,17 @@
 package sbd.telegram.database;
 
-import lombok.SneakyThrows;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Client {
-//    public static String firstName;
+public class InputControl {
     private static String secondName;
     private static String lastName;
     private static String mail;
     private static String phoneNumber;
     private static String firstName;
     DataBase dataBase;
-    public Client() {
+    public InputControl() {
         this.dataBase = new DataBase();
     }
 

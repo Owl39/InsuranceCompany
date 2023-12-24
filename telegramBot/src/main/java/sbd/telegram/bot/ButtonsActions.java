@@ -2,7 +2,7 @@ package sbd.telegram.bot;
 
 import lombok.SneakyThrows;
 import sbd.telegram.controllers.User;
-import sbd.telegram.database.Client;
+import sbd.telegram.database.InputControl;
 import sbd.telegram.database.DataBase;
 
 import java.util.*;
@@ -13,7 +13,7 @@ import static sbd.telegram.controllers.UserState.*;
 public class ButtonsActions {
 
     private final Bot bot;
-    private final Client client;
+    private final InputControl inputControl;
     private final DataBase dataBase;
     private final InlineKeyboard inlineKeyboard;
     static String typeName;
@@ -23,7 +23,7 @@ public class ButtonsActions {
     public ButtonsActions() {
         this.bot = new Bot();
         this.dataBase = new DataBase();
-        this.client = new Client();
+        this.inputControl = new InputControl();
         this.inlineKeyboard = new InlineKeyboard();
     }
 
@@ -32,21 +32,21 @@ public class ButtonsActions {
         switch (dataText) {
             case "Змінити данні акаунту":
 //                TODO сделать запрос к бд на замену конкретных данных
-                if (client.isValidClient(chatId)) {
+                if (inputControl.isValidClient(chatId)) {
                     user.setState(EDIT);
                     bot.execute(inlineKeyboard.buttonsForEditUser(chatId));
                     flipNoneToKey(user);
                 } else noRegistratedClient(chatId);
                 break;
             case "Оформити страхування":
-                if (client.isValidClient(chatId)) {
+                if (inputControl.isValidClient(chatId)) {
                     user.setState(POLICY);
                     bot.execute(inlineKeyboard.buttonsForInsurance(chatId, arrayOfTypes));
                     flipNoneToKey(user);
                 } else noRegistratedClient(chatId);
                 break;
             case "Переглянути активні страхування":
-                if (client.isValidClient(chatId)) {
+                if (inputControl.isValidClient(chatId)) {
                     user.setState(POLICY_CHECK);
                     showActiveInsurances(inlineKeyboard, user, chatId);
                     flipNoneToKey(user);
@@ -55,6 +55,8 @@ public class ButtonsActions {
             case "!!!!!Видалити акаунт!!!!!":
                 if (dataBase.deleteClient(chatId) > 0) {
                     user.setState(REGISTRATION);
+                    setActiveInsurances(chatId);
+                    for (String arrayOfActiveIn : arrayOfActiveIns) dataBase.deleteInsurance(chatId, arrayOfActiveIn);
 //                    TODO сделать запрос к бд на удаление всех страховок у юзера
                     bot.execute(bot.printText(chatId, "Акаунт видалено успішно. Щоб ввести повторно дані: /reg"));
                 } else noRegistratedClient(chatId);
@@ -84,7 +86,7 @@ public class ButtonsActions {
                     bot.execute(bot.printText(chatId, "Немає активних страхувань для видалення"));
                 break;
             case "Повернутися в головне меню":
-                bot.onStepBack(user, client);
+                bot.onStepBack(user, inputControl);
                 break;
             default:
                 break;
@@ -120,7 +122,7 @@ public class ButtonsActions {
             }
         }
         if (dataText.equals("Повернутися в головне меню")) {
-            bot.onStepBack(user, client);
+            bot.onStepBack(user, inputControl);
         }
     }
 
@@ -134,8 +136,8 @@ public class ButtonsActions {
                 bot.execute(bot.printText(chatId, dataBase.readInsurances(i + 1)));
             }
         }
-        user.setState(POLICY_ADD);
         bot.execute(inlineKeyboard.insurancesIsRelevant(chatId, user.getState()));
+        user.setState(POLICY_ADD);
     }
 
     @SneakyThrows
@@ -165,7 +167,7 @@ public class ButtonsActions {
                 user.setState(POLICY);
                 break;
             case "Повернутися в головне меню":
-                bot.onStepBack(user, client);
+                bot.onStepBack(user, inputControl);
                 break;
         }
     }
@@ -189,7 +191,7 @@ public class ButtonsActions {
                 bot.onAdminKey(user);
                 break;
             case "Інформація про клієнтів":
-                  Thread.sleep(500);
+                Thread.sleep(500);
                 ArrayList<String> clients = new ArrayList<>();
                 for (int i = 0; i < dataBase.getClientsNumber("client"); i++)
                     clients.add(dataBase.showClient(i + 1));
@@ -198,13 +200,10 @@ public class ButtonsActions {
                 break;
             case "Прибутковіть страхувань":
                 bot.execute(bot.printText(chatId, "Прибутковість страхувань:"));
-                 Thread.sleep(500);
+                Thread.sleep(500);
                 for (String type : arrayOfTypes)
-                {
                     typeAndClientsAmount.put(type, dataBase.getClientsNumber(type));
-                }
-                for(HashMap.Entry<String, Integer> entry : typeAndClientsAmount.entrySet())
-                {
+                for (HashMap.Entry<String, Integer> entry : typeAndClientsAmount.entrySet()) {
                     String type = entry.getKey();
                     Integer amountOfClientsOfIns = entry.getValue();
                     typeAndProfit.put(type, dataBase.getProfitability(type.toLowerCase()) * amountOfClientsOfIns);
@@ -214,10 +213,7 @@ public class ButtonsActions {
                 LinkedHashMap<String, Integer> sortedMap = list.stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
                 for (Map.Entry<String, Integer> entry : sortedMap.entrySet())
-                {
-                    bot.execute(bot.printText(chatId,entry.getKey() + ": " + entry.getValue()));
-                }
-                user.setState(ADMIN_KEY);
+                    bot.execute(bot.printText(chatId, "Страхування " + entry.getKey() + " приносить у місяць " + entry.getValue() + "$"));
                 bot.onAdminKey(user);
                 break;
         }

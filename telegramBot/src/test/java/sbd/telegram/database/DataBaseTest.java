@@ -1,4 +1,4 @@
-package sbd.telegram;
+package sbd.telegram.database;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +25,7 @@ public class DataBaseTest {
     }
 
     @Test
-    void testShowClient() {
+    void showClientTest() {
         String expected = "Client ID: 562373389\nFull name: dan daaan daniliv\nEmail: gmail@com\nPhone: +38475111";
         String result = dataBase.showClient(1);
         assertEquals(expected, result);
@@ -33,7 +33,7 @@ public class DataBaseTest {
 
     @Test
     @SneakyThrows
-    void testConnectSQLite() {
+    void connectSQLiteTest() {
         boolean isConnected = false;
         DataBase.connectSQLite();
         isConnected = true;
@@ -42,7 +42,7 @@ public class DataBaseTest {
 
     @Test
     @SneakyThrows
-    public void testRedisConnection() {
+    public void redisConnectionTest() {
         boolean isConnected = false;
         DataBase.connectRedis();
         Jedis redisDB = DataBase.redisDB;
@@ -51,7 +51,7 @@ public class DataBaseTest {
     }
 
     @Test
-    public void testWriteTable() {
+    public void writeTableTest() {
         DataBase mockedDatabase = mock(DataBase.class);
         Long clientId = 12345L;
         String firstName = "John";
@@ -67,7 +67,7 @@ public class DataBaseTest {
     }
 
     @Test
-    public void testAddInsuranceWhenInsuranceExists() {
+    public void addInsuranceValidTest() {
         DataBase mockedDatabase = mock(DataBase.class);
         Long existingChatId = 12345L;
         String existingInsuranceType = "existingInsurance";
@@ -77,7 +77,7 @@ public class DataBaseTest {
     }
 
     @Test
-    public void testAddInsuranceWhenInsuranceDoesNotExist() {
+    public void addInsuranceNotValidTest() {
         DataBase mockedDatabase = mock(DataBase.class);
         Long nonExistingChatId = 12345L;
         String nonExistingInsuranceType = "nonExistingInsurance";
@@ -87,7 +87,7 @@ public class DataBaseTest {
     }
 
     @Test
-    public void testReadInsurances() {
+    public void readInsurancesTest() {
         DataBase database = new DataBase();
         Integer insuranceId = 12345;
         String expectedOutput = "Тип страхування: ТипСтрахування\nЦіна за місяць - 100$\nПри страховому випадку покриє 50% від затрат";
@@ -98,7 +98,7 @@ public class DataBaseTest {
     }
 
     @Test
-    public void testDeleteInsurance() {
+    public void deleteInsuranceTest() {
         DataBase mockedDatabase = mock(DataBase.class);
         Long chatId = 12345L;
         String typeOfInsurance = "SomeInsurance";
@@ -108,7 +108,7 @@ public class DataBaseTest {
 
     @SneakyThrows
     @Test
-    public void testFindClientIdWhenClientIdExists(){
+    public void findClientIdValidTest(){
         DataBase mockedDatabase = mock(DataBase.class);
         Long existingChatId = 12345L;
         ResultSet resultSet = mock(ResultSet.class);
@@ -120,56 +120,61 @@ public class DataBaseTest {
 
     @SneakyThrows
     @Test
-    public void testFindClientIdWhenClientIdDoesNotExist() {
-        DataBase mockedDatabase = mock(DataBase.class);
-        Long nonExistingChatId = 12345L;
-        ResultSet resultSet = mock(ResultSet.class);
-        when(resultSet.next()).thenReturn(false);
-        when(mockedDatabase.staticQuery(anyString(), eq(nonExistingChatId))).thenReturn(resultSet);
-        boolean result = mockedDatabase.findClientId(nonExistingChatId);
+    public void findClientIdNotValidTest() {
+        Long nonExistingChatId = 54321L;
+        boolean result = dataBase.findClientId(nonExistingChatId);
         assertFalse(result, "Client ID should not exist");
     }
     @SneakyThrows
     @Test
-    public void testDeleteClient() {
+    public void deleteClientTest() {
         DataBase mockedDatabase = mock(DataBase.class);
         Long chatId = 12345L;
         assertEquals(0, mockedDatabase.deleteClient(chatId));
     }
 
-//    @SneakyThrows
-//    @Test
-//    public void testCheckAvailabilityWhenInsuranceExists() {
-//        DataBase mockedDatabase = mock(DataBase.class);
-//     //   DataBase database = new DataBase();
-//      //  ResultSet resultSet = mock(ResultSet.class);
-//
-//        when(mockedDatabase.staticQuery(eq("SELECT 1 FROM car WHERE clientId = ?"), eq(562373389L))).thenReturn(createMockResultSetWithResults());
-//      //  when(resultSet.next()).thenReturn(true);
-//        Long chatId = 562373389L;
-//        String typeOfInsurance = "car";
-//        assertTrue(mockedDatabase.checkAvailability(562373389L, "car"));
-//    }
-//
-//    @SneakyThrows
-//    private ResultSet createMockResultSetWithResults(){
-//        ResultSet resultSet = mock(ResultSet.class);
-//        when(resultSet.next()).thenReturn(true);
-//        return resultSet;
-//    }
-//
-//
-//    @SneakyThrows
-//    @Test
-//    public void testCheckAvailabilityWhenInsuranceDoesNotExists() {
-//        DataBase mockedDatabase = mock(DataBase.class);
-//        ResultSet resultSet = mock(ResultSet.class);
-//        when(resultSet.next()).thenReturn(true);
-//        when(mockedDatabase.staticQuery(eq("SELECT 1 FROM car WHERE clientId = ?"), eq(12345L))).thenReturn(resultSet);
-//        Long chatId = 12345L;
-//        String typeOfInsurance = "medical";
-//        assertFalse(mockedDatabase.checkAvailability(chatId, typeOfInsurance));
-//    }
+    @SneakyThrows
+    @Test
+    public void checkAvailabilityValidTest() {
+        Long chatId = 12345L;
+        String typeOfInsurance = "car";
+        assertTrue(!dataBase.checkAvailability(chatId, typeOfInsurance));
+    }
+    @SneakyThrows
+    @Test
+    public void checkAvailabilityNotValidTest() {
+        Long chatId = 12345L;
+        String typeOfInsurance = "medical";
+        assertFalse(dataBase.checkAvailability(chatId, typeOfInsurance));
+    }
+    @SneakyThrows
+    @Test
+    public void isAdminTest() {
+        Long chatId = 562373389L;
+        assertTrue(dataBase.isAdmin(chatId));
+    }
 
+    @SneakyThrows
+    @Test
+    public void isNotAdminTest() {
+        Long chatId = 12345L;
+        assertFalse(dataBase.isAdmin(chatId));
+    }
 
+    @SneakyThrows
+    @Test
+    public void showWorkerTest() {
+        String key = "worker:5";
+        String expectedOutput = "Worker ID: 5\nFirstname: Al\nLastname: Capone\nPosition: consultant\nPhone: +380639485789\nSalary: 1950";
+                String actualOutput = dataBase.showWorker(key);
+        assertEquals(expectedOutput, actualOutput);
+    }
+
+    @SneakyThrows
+    @Test
+    public void getProfitabilityTest() {
+        String tableName = "life";
+        int actualOutput = dataBase.getProfitability(tableName);
+        assertEquals(20, actualOutput);
+    }
 }

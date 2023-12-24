@@ -1,25 +1,25 @@
-package sbd.telegram;
+package sbd.telegram.database;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import sbd.telegram.database.Client;
+import sbd.telegram.database.InputControl;
 import sbd.telegram.database.InputState;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ClientTest {
-    private Client client;
+public class InputControlTest {
+    private InputControl inputControl;
 
     @BeforeEach
     public void setUp() {
-        client = new Client();
+        inputControl = new InputControl();
     }
 
     @Test
     public void testValidInputStringParser() {
-        Serializable result = client.inputStringParser("Сві Сві Сві Mail@ +3");
+        Serializable result = inputControl.inputStringParser("Сві Сві Сві Mail@ +3");
         Assertions.assertTrue(result instanceof ArrayList);
         ArrayList<?> inputs = (ArrayList<?>) result;
         Assertions.assertFalse(inputs.isEmpty());
@@ -27,11 +27,9 @@ public class ClientTest {
 
     @Test
     public void testInvalidInputStringParser() {
-        Serializable result = client.inputStringParser("Invalid input");
+        Serializable result = inputControl.inputStringParser("Invalid input");
         Assertions.assertTrue(result instanceof ArrayList);
         ArrayList<InputState> inputs = (ArrayList<InputState>) result;
         Assertions.assertFalse(inputs.isEmpty());
     }
-
-    // Add more tests for different scenarios, edge cases, and invalid inputs
 }

@@ -6,7 +6,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import sbd.telegram.controllers.User;
-import sbd.telegram.database.Client;
+import sbd.telegram.database.InputControl;
 import sbd.telegram.database.DataBase;
 import sbd.telegram.database.InputState;
 
@@ -45,9 +45,9 @@ public class Bot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             Long chatId = update.getMessage().getChatId();
             var user = getSession(chatId);
-            Client client = new Client();
+            InputControl inputControl = new InputControl();
             String inputText = update.getMessage().getText();
-            doUserAction(inputText, client, user);
+            doUserAction(inputText, inputControl, user);
         } else if (update.hasCallbackQuery()) {
             callbackQueryCheck(update);
         }
@@ -77,9 +77,9 @@ public class Bot extends TelegramLongPollingBot {
             buttonsActions.doKeyAction(dataText, chatId, user);
         if (user.getState() == EDIT || user.getState() == POLICY_DELETE || user.getState() == ADMIN)
             buttonsActions.doEditAction(dataText, chatId, user);
-        if (user.getState() == POLICY || user.getState() == NONE || user.getState() == ADMIN)
+        if (user.getState() == POLICY || user.getState() == POLICY_ADD || user.getState() == NONE || user.getState() == ADMIN)
             buttonsActions.doInsuranceAction(user, dataText, chatId);
-        if (user.getState() == POLICY_ADD || user.getState() == ADMIN)
+        if (user.getState() == POLICY_ADD || user.getState() == POLICY || user.getState() == ADMIN)
             buttonsActions.doInsuranceTechAction(dataText, user);
         if (user.getState() == POLICY_DELETE || user.getState() == ADMIN)
             buttonsActions.doDeleteInsurance(dataText, chatId);
@@ -88,17 +88,17 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     @SneakyThrows
-    public void doUserAction(String inputText, Client client, User user) {
+    public void doUserAction(String inputText, InputControl inputControl, User user) {
         Long chatId = user.getChatId();
         switch (inputText) {
             case "/start":
-                onStart(user, client);
+                onStart(user, inputControl);
                 break;
             case "/reg":
-                onRegistration(user, client);
+                onRegistration(user, inputControl);
                 break;
             case "/key":
-                onKey(user, client);
+                onKey(user, inputControl);
                 break;
             case "/admin":
                 DataBase dataBase = new DataBase();
@@ -108,14 +108,14 @@ public class Bot extends TelegramLongPollingBot {
                 }
                 break;
             default:
-                onUserInput(inputText, user, client);
+                onUserInput(inputText, user, inputControl);
                 break;
         }
     }
 
     @SneakyThrows
-    private void onUserInput(String inputText, User user, Client client) {
-        result = client.inputStringParser(inputText);
+    public void onUserInput(String inputText, User user, InputControl inputControl) {
+        result = inputControl.inputStringParser(inputText);
         Long chatId = user.getChatId();
         if (user.getState() == REGISTRATION) {
             if (result instanceof ArrayList) {
@@ -137,7 +137,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     @SneakyThrows
-    private void invalidInput(Long chatId, ArrayList<InputState> states) {
+    public void invalidInput(Long chatId, ArrayList<InputState> states) {
         for (InputState state : states) {
             switch (state) {
                 case SECOND:
@@ -170,10 +170,10 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     @SneakyThrows
-    public void onStart(User user, Client client) {
+    public void onStart(User user, InputControl inputControl) {
         user.setState(START);
         Long chatId = user.getChatId();
-        if (!client.isValidClient(chatId))
+        if (!inputControl.isValidClient(chatId))
             execute(printText(chatId, ("\uD83D\uDC4B Вас вітає Insurance Company Bot! Ваш персональный \uD83C\uDD94:" + user.getChatId() +
                     ". \n\nСпочатку треба зареєструватися /reg")));
         else
@@ -182,10 +182,10 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     @SneakyThrows
-    private void onRegistration(User user, Client client) {
+    private void onRegistration(User user, InputControl inputControl) {
         user.setState(REGISTRATION);
         Long chatId = user.getChatId();
-        if (!client.isValidClient(chatId))
+        if (!inputControl.isValidClient(chatId))
             execute(printText(chatId, "Введіть свої персональні дані в форматі: \n\nПрізвище Ім'я По-батькові Mail@mail Контактний номер телефону"));
         else {
             execute(printText(chatId, "Ви вже зареєстровані. \n\nЩоб перейти в особистий кабінет - натисніть /key"));
@@ -199,12 +199,12 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     @SneakyThrows
-    private void onKey(User user, Client client) {
+    public void onKey(User user, InputControl inputControl) {
         user.setState(KEY);
         Long chatId = user.getChatId();
-        client.writeClientTable(user.getChatId());
+        inputControl.writeClientTable(user.getChatId());
 
-        if (client.isValidClient(chatId)) {
+        if (inputControl.isValidClient(chatId)) {
             InlineKeyboard inlineKeyboard = new InlineKeyboard();
             execute(inlineKeyboard.buttonsForKey(chatId));
         } else {
@@ -214,8 +214,8 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     @SneakyThrows
-    public void onStepBack(User user, Client client) {
-        onKey(user, client);
+    public void onStepBack(User user, InputControl inputControl) {
+        onKey(user, inputControl);
     }
 
     @SneakyThrows
@@ -227,9 +227,12 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     public SendMessage printText(Long chatId, String text) {
-        var message = new SendMessage(chatId.toString(), text);
-        message.setText(text);
-        return message;
+        if (chatId != null) {
+            var message = new SendMessage(chatId.toString(), text);
+            message.setText(text);
+            return message;
+        } else {
+            throw new IllegalArgumentException("chatId is null!");
+        }
     }
 }
-

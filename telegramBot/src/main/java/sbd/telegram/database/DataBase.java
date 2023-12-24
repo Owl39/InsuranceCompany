@@ -11,15 +11,14 @@ import java.util.ArrayList;
 import java.sql.*;
 
 public class DataBase {
-    private static final String url = "jdbc:sqlite:C:/Users/Danie/Desktop/from1223_2/insurancecompanydb";
+    private static final String url = "jdbc:sqlite:C:/Users/Stas/Documents/!DZ/СБД/InsuranceCompany/insurancecompanydb";
     private static Connection connection;
     public static Jedis redisDB;
     private ResultSet resSet;
     private String resultString = null;
-    private final Insurance insurance;
-
-    public DataBase() {
-        this.insurance = new Insurance();
+    public DataBase(){
+        connectSQLite();
+        connectRedis();
     }
 
     @SneakyThrows
@@ -48,33 +47,6 @@ public class DataBase {
                 "', '" + phoneNumber + "')");
     }
 
-    // -------- Вывод таблицы--------
-    @SneakyThrows
-    public void readTable(Long chatId) {
-//       TODO Вывод для клиента
-        String query = "SELECT fullName, email, phone FROM client WHERE clientId = ?";
-        resSet = staticQuery(query, chatId);
-        while (resSet.next()) {
-            String fullName = resSet.getString("fullName");
-            String email = resSet.getString("email");
-            String phone = resSet.getString("phone");
-
-//            bot.execute(bot.printText("Full name = " + fullName + "\nEmail = " + email + "\nPhone = " + phone));
-//            TODO return
-        }
-    }
-//
-//    @SneakyThrows
-//    public void getOneClient(Long chatId) {
-//        resSet = statmt.executeQuery("SELECT * FROM client");
-//        while (resSet.next()) {
-//            int clientId = resSet.getInt("clientId");
-//            String fullName = resSet.getString("fullName");
-//            String email = resSet.getString("email");
-//            String phone = resSet.getString("phone");
-//        }
-//    }
-
     public void addInsurance(Long chatId, String typeOfInsurance) {
 //        TODO сделать проверку на наличие страховки
         String query = "INSERT INTO  " + typeOfInsurance + " (clientId, fullName, email, phone) SELECT client.clientID, client.fullName, client.email, client.phone FROM client WHERE client.clientId = ?";
@@ -86,10 +58,10 @@ public class DataBase {
         String query = "SELECT insuranceType, monthlyPrice, payoutPercentage FROM insurances WHERE insuranceId = ?";
         resSet = staticQuerySetInsuranceId(query, insuranceId);
         while (resSet.next()) {
-            insurance.setInsuranceType(resSet.getString("insuranceType"));
-            insurance.setPayoutPercentage(resSet.getString("monthlyPrice"));
-            insurance.setMonthlyPrice(resSet.getString("payoutPercentage"));
-            resultString = ("Тип страхування: " + insurance.getInsuranceType() + "\nЦіна за місяць - " + insurance.getMonthlyPrice() + "$" + "\nПри страховому випадку покриє " + insurance.getPayoutPercentage() + "% від затрат");
+            String insuranceType = resSet.getString("insuranceType");
+            String monthlyPrice = resSet.getString("monthlyPrice");
+            String payoutPercentage = resSet.getString("payoutPercentage");
+            resultString = ("Тип страхування: " + insuranceType + "\nЦіна за місяць - " + monthlyPrice + "$" + "\nПри страховому випадку покриє " + payoutPercentage + "% від затрат");
         }
         return resultString;
     }
@@ -125,7 +97,7 @@ public class DataBase {
 
     @SneakyThrows
     public int getClientsNumber(String tableName) {
-        String  query = "SELECT COUNT(*) FROM " + tableName;
+        String query = "SELECT COUNT(*) FROM " + tableName;
         PreparedStatement statmt = connection.prepareStatement(query);
         resSet = statmt.executeQuery();
         resSet.next();
@@ -135,18 +107,19 @@ public class DataBase {
     @SneakyThrows
     public String showWorker(String key) {
         Map<String, String> workerInfo = redisDB.hgetAll(key);
-   //     workerInfo = redisDB.sort("SORT worker:* BY worker:*->salary DESC GET worker:*->firstname GET worker:*->lastname GET worker:*->position GET worker:*->phone GET worker:*->salary");
+        //     workerInfo = redisDB.sort("SORT worker:* BY worker:*->salary DESC GET worker:*->firstname GET worker:*->lastname GET worker:*->position GET worker:*->phone GET worker:*->salary");
         return resultString = ("Worker ID: " + key.substring(key.lastIndexOf(":") + 1) + "\nFirstname: " + workerInfo.get("firstname") + "\nLastname: " +
                 workerInfo.get("lastname") + "\nPosition: " + workerInfo.get("position") + "\nPhone: " + workerInfo.get("phone") + "\nSalary: " + workerInfo.get("salary"));
     }
+
     @SneakyThrows
     public String[] doSortKeys(Set<String> keys) {
         List<String> keysList = new ArrayList<>(keys);
         keysList.sort((k1, k2) -> {
-                    Double salary1 = Double.parseDouble(redisDB.hget(k1, "salary"));
-                    Double salary2 = Double.parseDouble(redisDB.hget(k2, "salary"));
-                    return salary2.compareTo(salary1);
-                });
+            Double salary1 = Double.parseDouble(redisDB.hget(k1, "salary"));
+            Double salary2 = Double.parseDouble(redisDB.hget(k2, "salary"));
+            return salary2.compareTo(salary1);
+        });
         return keysList.toArray(new String[0]);
     }
 
@@ -155,7 +128,7 @@ public class DataBase {
         String query = "SELECT * FROM client";
         PreparedStatement statmt = connection.prepareStatement(query);
         resSet = statmt.executeQuery();
-        while(i > 0) {
+        while (i > 0) {
             resSet.next();
             --i;
         }
