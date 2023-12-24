@@ -173,6 +173,37 @@ public class ButtonsActions {
     }
 
     @SneakyThrows
+    public void doAdminAction(String dataText, User user) {
+        Long chatId = user.getChatId();
+        DataBase dataBase = new DataBase();
+        switch (dataText) {
+            case "Інформація про працівників":
+                bot.execute(bot.printText(chatId, "Інформація про працівників (відсортована по розміру зарплатні)"));
+                Thread.sleep(1000);
+                Set<String> keys = DataBase.redisDB.keys("worker:*");
+                ArrayList<String> workers = new ArrayList<>();
+                String[] sortedKeys = dataBase.doSortKeys(keys);
+                for (String key : sortedKeys)
+                    workers.add(dataBase.showWorker(key));
+                for (String worker : workers) bot.execute(bot.printText(chatId, worker));
+                bot.onAdminKey(user);
+                break;
+            case "Інформація про клієнтів":
+                Thread.sleep(1000);
+                ArrayList<String> clients = new ArrayList<>();
+                for (int i = 0; i < dataBase.getClientsNumber(); i++)
+                    clients.add(dataBase.showClient(i + 1));
+                for (String s : clients) bot.execute(bot.printText(chatId, s));
+                bot.onAdminKey(user);
+                break;
+            case "Інформація про клієнта":
+                user.setState(ADMIN_KEY);
+                bot.onAdminKey(user);
+                break;
+        }
+    }
+
+    @SneakyThrows
     public void onPolicy(User user) {
         user.setState(POLICY_ADD);
     }
@@ -184,31 +215,5 @@ public class ButtonsActions {
     @SneakyThrows
     public void noRegistratedClient(Long chatId) {
         bot.execute(bot.printText(chatId, "Ваш акаунт не зареєстрований. Щоб продовжити - натисніть /reg"));
-    }
-
-    @SneakyThrows
-    public void doAdminAction(String dataText, User user) {
-        Long chatId = user.getChatId();
-        DataBase dataBase = new DataBase();
-        switch (dataText) {
-            case "Інформація про працівників":
-                bot.execute(bot.printText(chatId, "Інформація про працівників (відсортована по розміру зарплатні(пока нет, делаю))"));
-                Set<String> keys = DataBase.redisDB.keys("worker:*");
-                ArrayList<String> workers = new ArrayList<>();
-                for (String key : keys)
-                    workers.add(dataBase.showWorker(key));
-                for (String worker : workers) bot.execute(bot.printText(chatId, worker));
-                break;
-            case "Інформація про клієнтів":
-                ArrayList<String> clients = new ArrayList<>();
-                for (int i = 0; i < dataBase.getClientsNumber(); i++)
-                    clients.add(dataBase.showClient(i + 1));
-                for (int i = 0; i < clients.size(); i++)
-                    bot.execute(bot.printText(chatId, clients.get(i)));
-                break;
-            case "Інформація про клієнта":
-                user.setState(ADMIN_KEY);
-                break;
-        }
     }
 }

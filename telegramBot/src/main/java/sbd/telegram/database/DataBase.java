@@ -4,16 +4,18 @@ import lombok.SneakyThrows;
 import redis.clients.jedis.Jedis;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
 import java.sql.*;
 
 public class DataBase {
-    private static final String url = "jdbc:sqlite:C:/Users/Danie/Desktop/from1223/insurancecompanydb";
+    private static final String url = "jdbc:sqlite:C:/Users/Stas/Documents/!DZ/СБД/InsuranceCompany/insurancecompanydb";
     private static Connection connection;
     public static Jedis redisDB;
     private ResultSet resSet;
     private String resultString = null;
-    private String query = null;
     private final Insurance insurance;
 
     public DataBase() {
@@ -75,13 +77,13 @@ public class DataBase {
 
     public void addInsurance(Long chatId, String typeOfInsurance) {
 //        TODO сделать проверку на наличие страховки
-        query = "INSERT INTO  " + typeOfInsurance + " (clientId, fullName, email, phone) SELECT client.clientID, client.fullName, client.email, client.phone FROM client WHERE client.clientId = ?";
+        String query = "INSERT INTO  " + typeOfInsurance + " (clientId, fullName, email, phone) SELECT client.clientID, client.fullName, client.email, client.phone FROM client WHERE client.clientId = ?";
         staticUpdate(query, chatId);
     }
 
     @SneakyThrows
     public String readInsurances(Integer insuranceId) {
-        query = "SELECT insuranceType, monthlyPrice, payoutPercentage FROM insurances WHERE insuranceId = ?";
+        String query = "SELECT insuranceType, monthlyPrice, payoutPercentage FROM insurances WHERE insuranceId = ?";
         resSet = staticQuerySetInsuranceId(query, insuranceId);
         while (resSet.next()) {
             insurance.setInsuranceType(resSet.getString("insuranceType"));
@@ -93,25 +95,25 @@ public class DataBase {
     }
 
     public void deleteInsurance(Long chatId, String typeOfInsurance) {
-        query = "DELETE FROM " + typeOfInsurance + " WHERE clientId = ?";
+        String query = "DELETE FROM " + typeOfInsurance + " WHERE clientId = ?";
         staticUpdate(query, chatId);
     }
 
     @SneakyThrows
     public boolean findClientId(Long chatId) {
-        query = "SELECT * FROM client WHERE clientId = ?";
+        String query = "SELECT * FROM client WHERE clientId = ?";
         resSet = staticQuery(query, chatId);
         return resSet.next();
     }
 
     public int deleteClient(Long chatId) {
-        query = "DELETE FROM client WHERE clientId = ?";
+        String query = "DELETE FROM client WHERE clientId = ?";
         return staticUpdate(query, chatId);
     }
 
     @SneakyThrows
     public boolean checkAvailability(Long chatId, String typeOfInsurance) {
-        query = "SELECT 1 FROM " + typeOfInsurance + " WHERE clientId = ?";
+        String query = "SELECT 1 FROM " + typeOfInsurance + " WHERE clientId = ?";
         resSet = staticQuery(query, chatId);
         return resSet.next();
     }
@@ -123,7 +125,7 @@ public class DataBase {
 
     @SneakyThrows
     public int getClientsNumber() {
-        query = "SELECT COUNT(*) FROM client";
+        String  query = "SELECT COUNT(*) FROM client";
         PreparedStatement statmt = connection.prepareStatement(query);
         resSet = statmt.executeQuery();
         resSet.next();
@@ -133,14 +135,24 @@ public class DataBase {
     @SneakyThrows
     public String showWorker(String key) {
         Map<String, String> workerInfo = redisDB.hgetAll(key);
+   //     workerInfo = redisDB.sort("SORT worker:* BY worker:*->salary DESC GET worker:*->firstname GET worker:*->lastname GET worker:*->position GET worker:*->phone GET worker:*->salary");
         return resultString = ("Worker ID: " + key.substring(key.lastIndexOf(":") + 1) + "\nFirstname: " + workerInfo.get("firstname") + "\nLastname: " +
                 workerInfo.get("lastname") + "\nPosition: " + workerInfo.get("position") + "\nPhone: " + workerInfo.get("phone") + "\nSalary: " + workerInfo.get("salary"));
     }
-   // SORT worker:* BY worker:*->salary DESC GET worker:*->firstname GET worker:*->lastname GET worker:*->position GET worker:*->phone GET worker:*->salary
+    @SneakyThrows
+    public String[] doSortKeys(Set<String> keys) {
+        List<String> keysList = new ArrayList<>(keys);
+        keysList.sort((k1, k2) -> {
+                    Double salary1 = Double.parseDouble(redisDB.hget(k1, "salary"));
+                    Double salary2 = Double.parseDouble(redisDB.hget(k2, "salary"));
+                    return salary2.compareTo(salary1);
+                });
+        return keysList.toArray(new String[0]);
+    }
 
     @SneakyThrows
     public String showClient(int i) {
-        query = "SELECT * FROM client";
+        String query = "SELECT * FROM client";
         PreparedStatement statmt = connection.prepareStatement(query);
         resSet = statmt.executeQuery();
         while(i > 0) {
@@ -152,21 +164,21 @@ public class DataBase {
     }
 
     @SneakyThrows
-    private ResultSet staticQuery(String query, Long chatId) {
+    public ResultSet staticQuery(String query, Long chatId) {
         PreparedStatement preparedStatement = connection.prepareStatement(query);
         preparedStatement.setLong(1, chatId);
         return preparedStatement.executeQuery();
     }
 
     @SneakyThrows
-    private int staticUpdate(String query, Long chatId) {
+    public int staticUpdate(String query, Long chatId) {
         PreparedStatement preparedStatement = connection.prepareStatement(query);
         preparedStatement.setLong(1, chatId);
         return preparedStatement.executeUpdate();
     }
 
     @SneakyThrows
-    private ResultSet staticQuerySetInsuranceId(String query, int insuranceId) {
+    public ResultSet staticQuerySetInsuranceId(String query, int insuranceId) {
         PreparedStatement preparedStatement = connection.prepareStatement(query);
         preparedStatement.setInt(1, insuranceId);
         return preparedStatement.executeQuery();

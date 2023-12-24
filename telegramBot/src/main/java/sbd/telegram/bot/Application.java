@@ -1,5 +1,4 @@
 package sbd.telegram.bot;
-import redis.clients.jedis.Jedis;
 import lombok.SneakyThrows;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
