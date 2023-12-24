@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.sql.*;
 
 public class DataBase {
-    private static final String url = "jdbc:sqlite:C:/Users/Stas/Documents/!DZ/СБД/InsuranceCompany/insurancecompanydb";
+    private static final String url = "jdbc:sqlite:C:/Users/Danie/Desktop/from1223_2/insurancecompanydb";
     private static Connection connection;
     public static Jedis redisDB;
     private ResultSet resSet;
@@ -124,8 +124,8 @@ public class DataBase {
     }
 
     @SneakyThrows
-    public int getClientsNumber() {
-        String  query = "SELECT COUNT(*) FROM client";
+    public int getClientsNumber(String tableName) {
+        String  query = "SELECT COUNT(*) FROM " + tableName;
         PreparedStatement statmt = connection.prepareStatement(query);
         resSet = statmt.executeQuery();
         resSet.next();
@@ -163,6 +163,15 @@ public class DataBase {
                 resSet.getString("email") + "\nPhone: " + resSet.getString("phone"));
     }
 
+
+    @SneakyThrows
+    public int getProfitability(String tableName) {
+        String query = "SELECT monthlyPrice FROM insurances WHERE insuranceType = ?";
+        resSet = staticQuerySetInsuranceType(query, tableName);
+        resSet.next();
+        return resSet.getInt("monthlyPrice");
+    }
+
     @SneakyThrows
     public ResultSet staticQuery(String query, Long chatId) {
         PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -181,6 +190,13 @@ public class DataBase {
     public ResultSet staticQuerySetInsuranceId(String query, int insuranceId) {
         PreparedStatement preparedStatement = connection.prepareStatement(query);
         preparedStatement.setInt(1, insuranceId);
+        return preparedStatement.executeQuery();
+    }
+
+    @SneakyThrows
+    public ResultSet staticQuerySetInsuranceType(String query, String tableName) {
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1, tableName);
         return preparedStatement.executeQuery();
     }
 }

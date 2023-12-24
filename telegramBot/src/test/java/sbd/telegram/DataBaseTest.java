@@ -11,6 +11,9 @@ import java.sql.ResultSet;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 public class DataBaseTest {
     private DataBase dataBase;
 
@@ -57,9 +60,9 @@ public class DataBaseTest {
         String email = "john.doe@example.com";
         String phoneNumber = "1234567890";
         mockedDatabase.writeTable(clientId, firstName, secondName, lastName, email, phoneNumber);
-        when(mockedDatabase.getClientsNumber()).thenReturn(1);
+        when(mockedDatabase.getClientsNumber("client")).thenReturn(1);
         int expectedRowCount = 1;
-        int actualRowCount = mockedDatabase.getClientsNumber();
+        int actualRowCount = mockedDatabase.getClientsNumber("client");
         assertEquals(expectedRowCount, actualRowCount, "New row should be inserted into the table");
     }
 
@@ -138,8 +141,35 @@ public class DataBaseTest {
 //    @Test
 //    public void testCheckAvailabilityWhenInsuranceExists() {
 //        DataBase mockedDatabase = mock(DataBase.class);
+//     //   DataBase database = new DataBase();
+//      //  ResultSet resultSet = mock(ResultSet.class);
+//
+//        when(mockedDatabase.staticQuery(eq("SELECT 1 FROM car WHERE clientId = ?"), eq(562373389L))).thenReturn(createMockResultSetWithResults());
+//      //  when(resultSet.next()).thenReturn(true);
+//        Long chatId = 562373389L;
+//        String typeOfInsurance = "car";
+//        assertTrue(mockedDatabase.checkAvailability(562373389L, "car"));
+//    }
+//
+//    @SneakyThrows
+//    private ResultSet createMockResultSetWithResults(){
+//        ResultSet resultSet = mock(ResultSet.class);
+//        when(resultSet.next()).thenReturn(true);
+//        return resultSet;
+//    }
+//
+//
+//    @SneakyThrows
+//    @Test
+//    public void testCheckAvailabilityWhenInsuranceDoesNotExists() {
+//        DataBase mockedDatabase = mock(DataBase.class);
+//        ResultSet resultSet = mock(ResultSet.class);
+//        when(resultSet.next()).thenReturn(true);
+//        when(mockedDatabase.staticQuery(eq("SELECT 1 FROM car WHERE clientId = ?"), eq(12345L))).thenReturn(resultSet);
 //        Long chatId = 12345L;
 //        String typeOfInsurance = "medical";
-//        assertTrue(mockedDatabase.checkAvailability(chatId, typeOfInsurance));
+//        assertFalse(mockedDatabase.checkAvailability(chatId, typeOfInsurance));
 //    }
+
+
 }

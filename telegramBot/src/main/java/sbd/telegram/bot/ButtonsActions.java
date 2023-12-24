@@ -5,10 +5,8 @@ import sbd.telegram.controllers.User;
 import sbd.telegram.database.Client;
 import sbd.telegram.database.DataBase;
 
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.*;
 
 import static sbd.telegram.controllers.UserState.*;
 
@@ -176,10 +174,12 @@ public class ButtonsActions {
     public void doAdminAction(String dataText, User user) {
         Long chatId = user.getChatId();
         DataBase dataBase = new DataBase();
+        HashMap<String, Integer> typeAndClientsAmount = new HashMap<>();
+        HashMap<String, Integer> typeAndProfit = new HashMap<>();
         switch (dataText) {
             case "Інформація про працівників":
                 bot.execute(bot.printText(chatId, "Інформація про працівників (відсортована по розміру зарплатні)"));
-                Thread.sleep(1000);
+                Thread.sleep(500);
                 Set<String> keys = DataBase.redisDB.keys("worker:*");
                 ArrayList<String> workers = new ArrayList<>();
                 String[] sortedKeys = dataBase.doSortKeys(keys);
@@ -189,14 +189,34 @@ public class ButtonsActions {
                 bot.onAdminKey(user);
                 break;
             case "Інформація про клієнтів":
-                Thread.sleep(1000);
+                  Thread.sleep(500);
                 ArrayList<String> clients = new ArrayList<>();
-                for (int i = 0; i < dataBase.getClientsNumber(); i++)
+                for (int i = 0; i < dataBase.getClientsNumber("client"); i++)
                     clients.add(dataBase.showClient(i + 1));
                 for (String s : clients) bot.execute(bot.printText(chatId, s));
                 bot.onAdminKey(user);
                 break;
-            case "Інформація про клієнта":
+            case "Прибутковіть страхувань":
+                bot.execute(bot.printText(chatId, "Прибутковість страхувань:"));
+                 Thread.sleep(500);
+                for (String type : arrayOfTypes)
+                {
+                    typeAndClientsAmount.put(type, dataBase.getClientsNumber(type));
+                }
+                for(HashMap.Entry<String, Integer> entry : typeAndClientsAmount.entrySet())
+                {
+                    String type = entry.getKey();
+                    Integer amountOfClientsOfIns = entry.getValue();
+                    typeAndProfit.put(type, dataBase.getProfitability(type.toLowerCase()) * amountOfClientsOfIns);
+                }
+                List<Map.Entry<String, Integer>> list = new ArrayList<>(typeAndProfit.entrySet());
+                list.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+                LinkedHashMap<String, Integer> sortedMap = list.stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+
+                for (Map.Entry<String, Integer> entry : sortedMap.entrySet())
+                {
+                    bot.execute(bot.printText(chatId,entry.getKey() + ": " + entry.getValue()));
+                }
                 user.setState(ADMIN_KEY);
                 bot.onAdminKey(user);
                 break;

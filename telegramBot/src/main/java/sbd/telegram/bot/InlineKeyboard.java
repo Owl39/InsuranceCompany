@@ -225,7 +225,7 @@ public class InlineKeyboard {
                     row1.add(createButton("Інформація про клієнтів"));
                     break;
                 case 2:
-                    row2.add(createButton("Інформація про клієнта"));
+                    row2.add(createButton("Прибутковіть страхувань"));
                     break;
                 default:
                     break;
