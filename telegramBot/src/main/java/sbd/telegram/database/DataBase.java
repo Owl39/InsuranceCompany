@@ -16,10 +16,10 @@ public class DataBase {
     public static Jedis redisDB;
     private ResultSet resSet;
     private String resultString = null;
-    public DataBase(){
-        connectSQLite();
-        connectRedis();
-    }
+//    public DataBase(){
+//        connectSQLite();
+//        connectRedis();
+//    }
 
     @SneakyThrows
     public static void connectSQLite() {

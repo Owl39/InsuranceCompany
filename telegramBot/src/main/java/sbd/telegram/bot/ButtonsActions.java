@@ -128,14 +128,17 @@ public class ButtonsActions {
 
     @SneakyThrows
     public void showActiveInsurances(InlineKeyboard inlineKeyboard, User user, Long chatId) {
-        bot.execute(bot.printText(chatId, "Маєте активні страхування: "));
-        String dataText;
-        for (int i = 0; i < arrayOfTypes.size(); i++) {
-            dataText = arrayOfTypes.get(i);
-            if (dataBase.checkAvailability(chatId, dataText)) {
-                bot.execute(bot.printText(chatId, dataBase.readInsurances(i + 1)));
+        if(arrayOfActiveIns.size() != 0) {
+            bot.execute(bot.printText(chatId, "Маєте активні страхування: "));
+            String dataText;
+            for (int i = 0; i < arrayOfTypes.size(); i++) {
+                dataText = arrayOfTypes.get(i);
+                if (dataBase.checkAvailability(chatId, dataText)) {
+                    bot.execute(bot.printText(chatId, dataBase.readInsurances(i + 1)));
+                }
             }
         }
+        else bot.execute(bot.printText(chatId, "У Вас немає активних страхувань. "));
         bot.execute(inlineKeyboard.insurancesIsRelevant(chatId, user.getState()));
         user.setState(POLICY_ADD);
     }
