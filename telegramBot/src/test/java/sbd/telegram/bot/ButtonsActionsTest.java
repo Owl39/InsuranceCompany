@@ -5,7 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import sbd.telegram.controllers.User;
-import sbd.telegram.database.DataBase;
+import sbd.telegram.database.DataBaseSql;
 
 public class ButtonsActionsTest {
 
@@ -13,7 +13,7 @@ public class ButtonsActionsTest {
     private Long chatId;
     private User user;
     private Bot bot;
-    private DataBase dataBase;
+
     private InlineKeyboard inlineKeyboard;
 
     @Before
@@ -22,7 +22,6 @@ public class ButtonsActionsTest {
         buttonsActions = new ButtonsActions();
         chatId = 562373389L;
         user = new User();
-        dataBase = new DataBase();
         inlineKeyboard = new InlineKeyboard();
     }
 
@@ -33,19 +32,8 @@ public class ButtonsActionsTest {
     }
 
     @Test
-    public void doDeleteInsurance() {
-        String insuranceType = "Car";
-        buttonsActions.doDeleteInsurance(insuranceType, chatId);
-    }
-
-    @Test
     public void showActiveInsurances() {
         buttonsActions.showActiveInsurances(inlineKeyboard, user, chatId);
-    }
-
-    @Test
-    public void doInsuranceTechAction() {
-        buttonsActions.doInsuranceTechAction("Додати поліс", user);
     }
 
     @Test

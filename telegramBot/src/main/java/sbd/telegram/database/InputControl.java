@@ -10,9 +10,10 @@ public class InputControl {
     private static String mail;
     private static String phoneNumber;
     private static String firstName;
-    DataBase dataBase;
+    DataBaseSql dataBaseSql;
+
     public InputControl() {
-        this.dataBase = new DataBase();
+        this.dataBaseSql = new DataBaseSql();
     }
 
     public Serializable inputStringParser(String inputText) {
@@ -64,11 +65,11 @@ public class InputControl {
     }
 
     public void writeClientTable(Long chatId) {
-        if ((!dataBase.findClientId(chatId)) && (firstName != null))
-            dataBase.writeTable(chatId, firstName, secondName, lastName, mail, phoneNumber);
+        if ((!dataBaseSql.findClientId(chatId)) && (firstName != null))
+            dataBaseSql.writeTable(chatId, firstName, secondName, lastName, mail, phoneNumber);
     }
 
     public boolean isValidClient(Long chatId) {
-        return dataBase.findClientId(chatId);
+        return dataBaseSql.findClientId(chatId);
     }
 }

@@ -1,25 +1,14 @@
 package sbd.telegram.database;
 
 import lombok.SneakyThrows;
-import redis.clients.jedis.Jedis;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.List;
-import java.util.ArrayList;
 
 import java.sql.*;
 
-public class DataBase {
+public class DataBaseSql {
     private static final String url = "jdbc:sqlite:C:/Users/Stas/Documents/!DZ/СБД/InsuranceCompany/insurancecompanydb";
     private static Connection connection;
-    public static Jedis redisDB;
     private ResultSet resSet;
     private String resultString = null;
-//    public DataBase(){
-//        connectSQLite();
-//        connectRedis();
-//    }
 
     @SneakyThrows
     public static void connectSQLite() {
@@ -33,13 +22,6 @@ public class DataBase {
     }
 
     @SneakyThrows
-    public static void connectRedis() {
-        redisDB = new Jedis("redis-14638.c55.eu-central-1-1.ec2.cloud.redislabs.com", 14638);
-        redisDB.auth("iphJnYUL7vUVvzySufTv2fDvrpSLsdMv");
-    }
-
-    // --------Заполнение таблицы--------
-    @SneakyThrows
     public void writeTable(Long clientId, String firstName, String secondName, String lastName, String email, String phoneNumber) {
         Statement statmt = connection.createStatement();
         String fullName = secondName + " " + firstName + " " + lastName;
@@ -48,7 +30,6 @@ public class DataBase {
     }
 
     public void addInsurance(Long chatId, String typeOfInsurance) {
-//        TODO сделать проверку на наличие страховки
         String query = "INSERT INTO  " + typeOfInsurance + " (clientId, fullName, email, phone) SELECT client.clientID, client.fullName, client.email, client.phone FROM client WHERE client.clientId = ?";
         staticUpdate(query, chatId);
     }
@@ -91,36 +72,12 @@ public class DataBase {
     }
 
     @SneakyThrows
-    public boolean isAdmin(Long chatId) {
-        return redisDB.exists("worker:" + chatId);
-    }
-
-    @SneakyThrows
     public int getClientsNumber(String tableName) {
         String query = "SELECT COUNT(*) FROM " + tableName;
         PreparedStatement statmt = connection.prepareStatement(query);
         resSet = statmt.executeQuery();
         resSet.next();
         return resSet.getInt(1);
-    }
-
-    @SneakyThrows
-    public String showWorker(String key) {
-        Map<String, String> workerInfo = redisDB.hgetAll(key);
-        //     workerInfo = redisDB.sort("SORT worker:* BY worker:*->salary DESC GET worker:*->firstname GET worker:*->lastname GET worker:*->position GET worker:*->phone GET worker:*->salary");
-        return resultString = ("Worker ID: " + key.substring(key.lastIndexOf(":") + 1) + "\nFirstname: " + workerInfo.get("firstname") + "\nLastname: " +
-                workerInfo.get("lastname") + "\nPosition: " + workerInfo.get("position") + "\nPhone: " + workerInfo.get("phone") + "\nSalary: " + workerInfo.get("salary"));
-    }
-
-    @SneakyThrows
-    public String[] doSortKeys(Set<String> keys) {
-        List<String> keysList = new ArrayList<>(keys);
-        keysList.sort((k1, k2) -> {
-            Double salary1 = Double.parseDouble(redisDB.hget(k1, "salary"));
-            Double salary2 = Double.parseDouble(redisDB.hget(k2, "salary"));
-            return salary2.compareTo(salary1);
-        });
-        return keysList.toArray(new String[0]);
     }
 
     @SneakyThrows

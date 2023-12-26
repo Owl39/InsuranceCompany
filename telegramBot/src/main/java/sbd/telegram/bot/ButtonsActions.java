@@ -2,8 +2,9 @@ package sbd.telegram.bot;
 
 import lombok.SneakyThrows;
 import sbd.telegram.controllers.User;
+import sbd.telegram.database.DataBaseRedis;
+import sbd.telegram.database.DataBaseSql;
 import sbd.telegram.database.InputControl;
-import sbd.telegram.database.DataBase;
 
 import java.util.*;
 import java.util.stream.*;
@@ -14,7 +15,8 @@ public class ButtonsActions {
 
     private final Bot bot;
     private final InputControl inputControl;
-    private final DataBase dataBase;
+    private final DataBaseSql dataBaseSql;
+    private final DataBaseRedis dataBaseRedis;
     private final InlineKeyboard inlineKeyboard;
     static String typeName;
     public final ArrayList<String> arrayOfTypes = new ArrayList<>(Arrays.asList("Car", "Medical", "Life", "RealEstate", "Business"));
@@ -22,7 +24,8 @@ public class ButtonsActions {
 
     public ButtonsActions() {
         this.bot = new Bot();
-        this.dataBase = new DataBase();
+        this.dataBaseSql = new DataBaseSql();
+        this.dataBaseRedis = new DataBaseRedis();
         this.inputControl = new InputControl();
         this.inlineKeyboard = new InlineKeyboard();
     }
@@ -31,7 +34,6 @@ public class ButtonsActions {
     void doKeyAction(String dataText, Long chatId, User user) {
         switch (dataText) {
             case "Змінити данні акаунту":
-//                TODO сделать запрос к бд на замену конкретных данных
                 if (inputControl.isValidClient(chatId)) {
                     user.setState(EDIT);
                     bot.execute(inlineKeyboard.buttonsForEditUser(chatId));
@@ -48,16 +50,16 @@ public class ButtonsActions {
             case "Переглянути активні страхування":
                 if (inputControl.isValidClient(chatId)) {
                     user.setState(POLICY_CHECK);
+                    setActiveInsurances(chatId);
                     showActiveInsurances(inlineKeyboard, user, chatId);
                     flipNoneToKey(user);
                 } else noRegistratedClient(chatId);
                 break;
             case "!!!!!Видалити акаунт!!!!!":
-                if (dataBase.deleteClient(chatId) > 0) {
+                if (dataBaseSql.deleteClient(chatId) > 0) {
                     user.setState(REGISTRATION);
                     setActiveInsurances(chatId);
-                    for (String arrayOfActiveIn : arrayOfActiveIns) dataBase.deleteInsurance(chatId, arrayOfActiveIn);
-//                    TODO сделать запрос к бд на удаление всех страховок у юзера
+                    for (String arrayOfActiveIn : arrayOfActiveIns) dataBaseSql.deleteInsurance(chatId, arrayOfActiveIn);
                     bot.execute(bot.printText(chatId, "Акаунт видалено успішно. Щоб ввести повторно дані: /reg"));
                 } else noRegistratedClient(chatId);
                 break;
@@ -69,11 +71,7 @@ public class ButtonsActions {
     @SneakyThrows
     void doEditAction(String dataText, Long chatId, User user) {
         switch (dataText) {
-            case "Ім'я":
-                break;
-            case "Mail":
-                break;
-            case "Номер телефону":
+            case "Ім'я", "Mail", "Номер телефону":
                 break;
             case "Видалити поліс":
                 user.setState(EDIT);
@@ -88,8 +86,6 @@ public class ButtonsActions {
             case "Повернутися в головне меню":
                 bot.onStepBack(user, inputControl);
                 break;
-            default:
-                break;
         }
     }
 
@@ -97,7 +93,7 @@ public class ButtonsActions {
     public void doDeleteInsurance(String dataText, Long chatId) {
         for (String type : arrayOfTypes) {
             if (dataText.equals(type)) {
-                dataBase.deleteInsurance(chatId, type);
+                dataBaseSql.deleteInsurance(chatId, type);
                 bot.execute(bot.printText(chatId, "Страховка " + type + " успішно видалена"));
                 break;
             }
@@ -107,7 +103,7 @@ public class ButtonsActions {
     @SneakyThrows
     public void setActiveInsurances(Long chatId) {
         for (String arrayOfType : arrayOfTypes) {
-            if (dataBase.checkAvailability(chatId, arrayOfType))
+            if (dataBaseSql.checkAvailability(chatId, arrayOfType))
                 arrayOfActiveIns.add(arrayOfType);
         }
     }
@@ -128,17 +124,17 @@ public class ButtonsActions {
 
     @SneakyThrows
     public void showActiveInsurances(InlineKeyboard inlineKeyboard, User user, Long chatId) {
-        if(arrayOfActiveIns.size() != 0) {
+        if (!arrayOfActiveIns.isEmpty()) {
             bot.execute(bot.printText(chatId, "Маєте активні страхування: "));
             String dataText;
             for (int i = 0; i < arrayOfTypes.size(); i++) {
                 dataText = arrayOfTypes.get(i);
-                if (dataBase.checkAvailability(chatId, dataText)) {
-                    bot.execute(bot.printText(chatId, dataBase.readInsurances(i + 1)));
+                if (dataBaseSql.checkAvailability(chatId, dataText)) {
+                    bot.execute(bot.printText(chatId, dataBaseSql.readInsurances(i + 1)));
                 }
             }
-        }
-        else bot.execute(bot.printText(chatId, "У Вас немає активних страхувань. "));
+            arrayOfActiveIns.clear();
+        } else bot.execute(bot.printText(chatId, "У Вас немає активних страхувань. "));
         bot.execute(inlineKeyboard.insurancesIsRelevant(chatId, user.getState()));
         user.setState(POLICY_ADD);
     }
@@ -146,7 +142,7 @@ public class ButtonsActions {
     @SneakyThrows
     private void showInsuranceInfo(User user, Long chatId, int count, String dataText) {
         typeName = dataText;
-        bot.execute(bot.printText(chatId, dataBase.readInsurances(count)));
+        bot.execute(bot.printText(chatId, dataBaseSql.readInsurances(count)));
         bot.execute(inlineKeyboard.buttonsForAddingInsurance(chatId));
         user.setState(POLICY);
     }
@@ -157,8 +153,8 @@ public class ButtonsActions {
         switch (dataText) {
             case "Додати поліс":
                 onPolicy(user);
-                if (!dataBase.checkAvailability(chatId, typeName.toLowerCase())) {
-                    dataBase.addInsurance(chatId, typeName.toLowerCase());
+                if (!dataBaseSql.checkAvailability(chatId, typeName.toLowerCase())) {
+                    dataBaseSql.addInsurance(chatId, typeName.toLowerCase());
                     bot.execute(bot.printText(chatId, "Тип страховки " + typeName + " успішно додано в список Ваших активних полісів"));
                     Thread.sleep(1000);
                     bot.execute(inlineKeyboard.buttonsForInsurance(user.getChatId(), arrayOfTypes));
@@ -178,26 +174,25 @@ public class ButtonsActions {
     @SneakyThrows
     public void doAdminAction(String dataText, User user) {
         Long chatId = user.getChatId();
-        DataBase dataBase = new DataBase();
         HashMap<String, Integer> typeAndClientsAmount = new HashMap<>();
         HashMap<String, Integer> typeAndProfit = new HashMap<>();
         switch (dataText) {
             case "Інформація про працівників":
                 bot.execute(bot.printText(chatId, "Інформація про працівників (відсортована по розміру зарплатні)"));
                 Thread.sleep(500);
-                Set<String> keys = DataBase.redisDB.keys("worker:*");
+                Set<String> keys = DataBaseRedis.redisDB.keys("worker:*");
                 ArrayList<String> workers = new ArrayList<>();
-                String[] sortedKeys = dataBase.doSortKeys(keys);
+                String[] sortedKeys = dataBaseRedis.doSortKeys(keys);
                 for (String key : sortedKeys)
-                    workers.add(dataBase.showWorker(key));
+                    workers.add(dataBaseRedis.showWorker(key));
                 for (String worker : workers) bot.execute(bot.printText(chatId, worker));
                 bot.onAdminKey(user);
                 break;
             case "Інформація про клієнтів":
                 Thread.sleep(500);
                 ArrayList<String> clients = new ArrayList<>();
-                for (int i = 0; i < dataBase.getClientsNumber("client"); i++)
-                    clients.add(dataBase.showClient(i + 1));
+                for (int i = 0; i < dataBaseSql.getClientsNumber("client"); i++)
+                    clients.add(dataBaseSql.showClient(i + 1));
                 for (String s : clients) bot.execute(bot.printText(chatId, s));
                 bot.onAdminKey(user);
                 break;
@@ -205,11 +200,11 @@ public class ButtonsActions {
                 bot.execute(bot.printText(chatId, "Прибутковість страхувань:"));
                 Thread.sleep(500);
                 for (String type : arrayOfTypes)
-                    typeAndClientsAmount.put(type, dataBase.getClientsNumber(type));
+                    typeAndClientsAmount.put(type, dataBaseSql.getClientsNumber(type));
                 for (HashMap.Entry<String, Integer> entry : typeAndClientsAmount.entrySet()) {
                     String type = entry.getKey();
                     Integer amountOfClientsOfIns = entry.getValue();
-                    typeAndProfit.put(type, dataBase.getProfitability(type.toLowerCase()) * amountOfClientsOfIns);
+                    typeAndProfit.put(type, dataBaseSql.getProfitability(type.toLowerCase()) * amountOfClientsOfIns);
                 }
                 List<Map.Entry<String, Integer>> list = new ArrayList<>(typeAndProfit.entrySet());
                 list.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));

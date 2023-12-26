@@ -4,9 +4,6 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import redis.clients.jedis.Jedis;
-import sbd.telegram.database.DataBase;
-
-import java.sql.ResultSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -15,19 +12,21 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class DataBaseTest {
-    private DataBase dataBase;
+    private DataBaseSql dataBaseSql;
+    private DataBaseRedis dataBaseRedis;
 
     @BeforeEach
     void setUp() {
-        dataBase = new DataBase();
-        DataBase.connectSQLite();
-        DataBase.connectRedis();
+        dataBaseSql = new DataBaseSql();
+        dataBaseRedis = new DataBaseRedis();
+        DataBaseSql.connectSQLite();
+        DataBaseRedis.connectRedis();
     }
 
     @Test
     void showClientTest() {
         String expected = "Client ID: 562373389\nFull name: dan daaan daniliv\nEmail: gmail@com\nPhone: +38475111";
-        String result = dataBase.showClient(1);
+        String result = dataBaseSql.showClient(1);
         assertEquals(expected, result);
     }
 
@@ -35,7 +34,7 @@ public class DataBaseTest {
     @SneakyThrows
     void connectSQLiteTest() {
         boolean isConnected = false;
-        DataBase.connectSQLite();
+        DataBaseSql.connectSQLite();
         isConnected = true;
         assertTrue(isConnected, "Connection should be established");
     }
@@ -44,15 +43,15 @@ public class DataBaseTest {
     @SneakyThrows
     public void redisConnectionTest() {
         boolean isConnected = false;
-        DataBase.connectRedis();
-        Jedis redisDB = DataBase.redisDB;
+        DataBaseRedis.connectRedis();
+        Jedis redisDB = DataBaseRedis.redisDB;
         isConnected = redisDB.isConnected();
         assertTrue(isConnected, "Connection to Redis should be established");
     }
 
     @Test
     public void writeTableTest() {
-        DataBase mockedDatabase = mock(DataBase.class);
+        DataBaseSql mockedDatabase = mock(DataBaseSql.class);
         Long clientId = 12345L;
         String firstName = "John";
         String secondName = "Doe";
@@ -68,7 +67,7 @@ public class DataBaseTest {
 
     @Test
     public void addInsuranceValidTest() {
-        DataBase mockedDatabase = mock(DataBase.class);
+        DataBaseSql mockedDatabase = mock(DataBaseSql.class);
         Long existingChatId = 12345L;
         String existingInsuranceType = "existingInsurance";
         when(mockedDatabase.checkAvailability(existingChatId, existingInsuranceType)).thenReturn(true);
@@ -78,7 +77,7 @@ public class DataBaseTest {
 
     @Test
     public void addInsuranceNotValidTest() {
-        DataBase mockedDatabase = mock(DataBase.class);
+        DataBaseSql mockedDatabase = mock(DataBaseSql.class);
         Long nonExistingChatId = 12345L;
         String nonExistingInsuranceType = "nonExistingInsurance";
         when(mockedDatabase.checkAvailability(nonExistingChatId, nonExistingInsuranceType)).thenReturn(false);
@@ -88,10 +87,9 @@ public class DataBaseTest {
 
     @Test
     public void readInsurancesTest() {
-        DataBase database = new DataBase();
         Integer insuranceId = 12345;
         String expectedOutput = "Тип страхування: ТипСтрахування\nЦіна за місяць - 100$\nПри страховому випадку покриє 50% від затрат";
-        DataBase mockedDatabase = mock(DataBase.class);
+        DataBaseSql mockedDatabase = mock(DataBaseSql.class);
         when(mockedDatabase.readInsurances(insuranceId)).thenReturn(expectedOutput);
         String actualOutput = mockedDatabase.readInsurances(insuranceId);
         assertEquals(expectedOutput, actualOutput, "Повинно бути отримано інформацію про страховку з бази даних");
@@ -99,7 +97,7 @@ public class DataBaseTest {
 
     @Test
     public void deleteInsuranceTest() {
-        DataBase mockedDatabase = mock(DataBase.class);
+        DataBaseSql mockedDatabase = mock(DataBaseSql.class);
         Long chatId = 12345L;
         String typeOfInsurance = "SomeInsurance";
         mockedDatabase.deleteInsurance(chatId, typeOfInsurance);
@@ -108,27 +106,8 @@ public class DataBaseTest {
 
     @SneakyThrows
     @Test
-    public void findClientIdValidTest(){
-        DataBase mockedDatabase = mock(DataBase.class);
-        Long existingChatId = 12345L;
-        ResultSet resultSet = mock(ResultSet.class);
-        when(resultSet.next()).thenReturn(true);
-        when(mockedDatabase.staticQuery(anyString(), eq(existingChatId))).thenReturn(resultSet);
-        boolean result = mockedDatabase.findClientId(existingChatId);
-        assertFalse(result, "Client ID should exist");
-    }
-
-    @SneakyThrows
-    @Test
-    public void findClientIdNotValidTest() {
-        Long nonExistingChatId = 54321L;
-        boolean result = dataBase.findClientId(nonExistingChatId);
-        assertFalse(result, "Client ID should not exist");
-    }
-    @SneakyThrows
-    @Test
     public void deleteClientTest() {
-        DataBase mockedDatabase = mock(DataBase.class);
+        DataBaseSql mockedDatabase = mock(DataBaseSql.class);
         Long chatId = 12345L;
         assertEquals(0, mockedDatabase.deleteClient(chatId));
     }
@@ -138,27 +117,27 @@ public class DataBaseTest {
     public void checkAvailabilityValidTest() {
         Long chatId = 12345L;
         String typeOfInsurance = "car";
-        assertTrue(!dataBase.checkAvailability(chatId, typeOfInsurance));
+        assertTrue(!dataBaseSql.checkAvailability(chatId, typeOfInsurance));
     }
     @SneakyThrows
     @Test
     public void checkAvailabilityNotValidTest() {
         Long chatId = 12345L;
         String typeOfInsurance = "medical";
-        assertFalse(dataBase.checkAvailability(chatId, typeOfInsurance));
+        assertFalse(dataBaseSql.checkAvailability(chatId, typeOfInsurance));
     }
     @SneakyThrows
     @Test
     public void isAdminTest() {
         Long chatId = 562373389L;
-        assertTrue(dataBase.isAdmin(chatId));
+        assertTrue(dataBaseRedis.isAdmin(chatId));
     }
 
     @SneakyThrows
     @Test
     public void isNotAdminTest() {
         Long chatId = 12345L;
-        assertFalse(dataBase.isAdmin(chatId));
+        assertFalse(dataBaseRedis.isAdmin(chatId));
     }
 
     @SneakyThrows
@@ -166,15 +145,7 @@ public class DataBaseTest {
     public void showWorkerTest() {
         String key = "worker:5";
         String expectedOutput = "Worker ID: 5\nFirstname: Al\nLastname: Capone\nPosition: consultant\nPhone: +380639485789\nSalary: 1950";
-                String actualOutput = dataBase.showWorker(key);
+                String actualOutput = dataBaseRedis.showWorker(key);
         assertEquals(expectedOutput, actualOutput);
-    }
-
-    @SneakyThrows
-    @Test
-    public void getProfitabilityTest() {
-        String tableName = "life";
-        int actualOutput = dataBase.getProfitability(tableName);
-        assertEquals(20, actualOutput);
     }
 }

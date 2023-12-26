@@ -6,8 +6,8 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import sbd.telegram.controllers.User;
+import sbd.telegram.database.DataBaseRedis;
 import sbd.telegram.database.InputControl;
-import sbd.telegram.database.DataBase;
 import sbd.telegram.database.InputState;
 
 import java.io.Serializable;
@@ -101,8 +101,8 @@ public class Bot extends TelegramLongPollingBot {
                 onKey(user, inputControl);
                 break;
             case "/admin":
-                DataBase dataBase = new DataBase();
-                if (dataBase.isAdmin(chatId)) {
+                DataBaseRedis dataBaseRedis = new DataBaseRedis();
+                if (dataBaseRedis.isAdmin(chatId)) {
                     execute(printText(chatId, "Hello Admin \uD83C\uDD94:" + chatId));
                     onAdminKey(user);
                 }
