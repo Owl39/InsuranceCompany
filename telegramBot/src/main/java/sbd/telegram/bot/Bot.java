@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import sbd.telegram.controllers.User;
 import sbd.telegram.database.DataBaseRedis;
+import sbd.telegram.database.DataBaseSql;
 import sbd.telegram.database.InputControl;
 import sbd.telegram.database.InputState;
 
@@ -117,7 +118,7 @@ public class Bot extends TelegramLongPollingBot {
     public void onUserInput(String inputText, User user, InputControl inputControl) {
         result = inputControl.inputStringParser(inputText);
         Long chatId = user.getChatId();
-        if (user.getState() == REGISTRATION) {
+        if (user.getState() == REGISTRATION || user.getState() == EDIT) {
             if (result instanceof ArrayList) {
                 ArrayList<InputState> states = (ArrayList<InputState>) result;
                 if (states.contains(InputState.NONE)) {
@@ -125,6 +126,10 @@ public class Bot extends TelegramLongPollingBot {
                     invalidInput(chatId, states);
                     user.setState(REGISTRATION);
                 } else {
+                    if (inputControl.isValidClient(chatId)) {
+                        DataBaseSql dataBaseSql = new DataBaseSql();
+                        dataBaseSql.deleteClient(chatId);
+                    }
                     execute(printText(chatId, "Це ваші дані: " + result));
                     onHasRegData(user);
                 }
@@ -182,7 +187,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     @SneakyThrows
-    private void onRegistration(User user, InputControl inputControl) {
+    public void onRegistration(User user, InputControl inputControl) {
         user.setState(REGISTRATION);
         Long chatId = user.getChatId();
         if (!inputControl.isValidClient(chatId))
@@ -196,6 +201,13 @@ public class Bot extends TelegramLongPollingBot {
     private void onHasRegData(User user) {
         Long chatId = user.getChatId();
         execute(printText(chatId, "Для переходу в особистий кабінет та збереження даних - натисніть /key. \n\nЩоб змінити ващі данні - натисніть /reg"));
+    }
+
+    @SneakyThrows
+    public void onEdit(User user) {
+        user.setState(EDIT);
+        Long chatId = user.getChatId();
+        execute(printText(chatId, "Введіть свої персональні дані в форматі: \n\nПрізвище Ім'я По-батькові Mail@mail Контактний номер телефону"));
     }
 
     @SneakyThrows

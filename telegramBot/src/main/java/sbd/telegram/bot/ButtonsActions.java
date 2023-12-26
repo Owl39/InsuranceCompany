@@ -59,7 +59,8 @@ public class ButtonsActions {
                 if (dataBaseSql.deleteClient(chatId) > 0) {
                     user.setState(REGISTRATION);
                     setActiveInsurances(chatId);
-                    for (String arrayOfActiveIn : arrayOfActiveIns) dataBaseSql.deleteInsurance(chatId, arrayOfActiveIn);
+                    for (String arrayOfActiveIn : arrayOfActiveIns)
+                        dataBaseSql.deleteInsurance(chatId, arrayOfActiveIn);
                     bot.execute(bot.printText(chatId, "Акаунт видалено успішно. Щоб ввести повторно дані: /reg"));
                 } else noRegistratedClient(chatId);
                 break;
@@ -72,6 +73,7 @@ public class ButtonsActions {
     void doEditAction(String dataText, Long chatId, User user) {
         switch (dataText) {
             case "Ім'я", "Mail", "Номер телефону":
+                bot.onEdit(user);
                 break;
             case "Видалити поліс":
                 user.setState(EDIT);
@@ -221,6 +223,7 @@ public class ButtonsActions {
     public void onPolicy(User user) {
         user.setState(POLICY_ADD);
     }
+
 
     void flipNoneToKey(User user) {
         if (user.getState() == NONE) user.setState(KEY);
