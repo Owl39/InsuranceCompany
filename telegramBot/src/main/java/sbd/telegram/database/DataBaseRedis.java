@@ -31,7 +31,7 @@ public class DataBaseRedis {
     }
 
     @SneakyThrows
-    public String[] sortKeysBySalary(Set<String> keys) {
+    public String[] sortWorkersBySalary(Set<String> keys) {
         List<String> keysList = new ArrayList<>(keys);
         keysList.sort((k1, k2) -> {
             Double salary1 = Double.parseDouble(redisDB.hget(k1, "salary"));

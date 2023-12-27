@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.jupiter.api.Nested;
 import sbd.telegram.controllers.User;
 import sbd.telegram.controllers.UserState;
+import sbd.telegram.database.DataBaseSql;
 import sbd.telegram.database.InputControl;
 
 import java.util.HashMap;
@@ -60,6 +61,7 @@ public class BotTest {
 
     @Test
     public void doUserAction() {
+        DataBaseSql.connectSQLite();
         user.setChatId(562373389L);
         InputControl inputControl = new InputControl();
         String inputText = "/start";
@@ -88,18 +90,20 @@ public class BotTest {
 
     @Test
     public void onKeyValid() {
+        DataBaseSql.connectSQLite();
         user.setState(UserState.KEY);
         user.setChatId(562373389L);
         InputControl inputControl = new InputControl();
         bot.onKey(user, inputControl);
         assertEquals(UserState.KEY, user.getState());
         assertEquals(562373389L, user.getChatId());
-        assertTrue(inputControl.isValidClient(451627964L));
+        assertTrue(inputControl.isValidClient(562373389L));
     }
 
     @SneakyThrows
     @Test
     public void onKeyNotValid() {
+        DataBaseSql.connectSQLite();
         user.setState(UserState.KEY);
         user.setChatId(562373389L);
         InputControl inputControl = new InputControl();

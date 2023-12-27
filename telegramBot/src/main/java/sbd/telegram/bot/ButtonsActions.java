@@ -184,7 +184,7 @@ public class ButtonsActions {
                 Thread.sleep(500);
                 Set<String> keys = DataBaseRedis.redisDB.keys("worker:*");
                 ArrayList<String> workers = new ArrayList<>();
-                String[] sortedKeys = dataBaseRedis.sortKeysBySalary(keys);
+                String[] sortedKeys = dataBaseRedis.sortWorkersBySalary(keys);
                 for (String key : sortedKeys)
                     workers.add(dataBaseRedis.showWorker(key));
                 for (String worker : workers) bot.execute(bot.printText(chatId, worker));

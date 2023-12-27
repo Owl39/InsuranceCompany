@@ -5,6 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import sbd.telegram.controllers.User;
+import sbd.telegram.database.DataBaseRedis;
 import sbd.telegram.database.DataBaseSql;
 
 public class ButtonsActionsTest {
@@ -12,13 +13,10 @@ public class ButtonsActionsTest {
     private ButtonsActions buttonsActions;
     private Long chatId;
     private User user;
-    private Bot bot;
-
     private InlineKeyboard inlineKeyboard;
 
     @Before
     public void setUp() {
-        bot = new Bot();
         buttonsActions = new ButtonsActions();
         chatId = 562373389L;
         user = new User();
@@ -38,6 +36,8 @@ public class ButtonsActionsTest {
 
     @Test
     public void doAdminAction() {
+        DataBaseSql.connectSQLite();
+        DataBaseRedis.connectRedis();
         user.setChatId(562373389L);
         buttonsActions.doAdminAction("Інформація про працівників", user);
         buttonsActions.doAdminAction("Інформація про клієнтів", user);

@@ -25,7 +25,7 @@ public class DataBaseTest {
 
     @Test
     void showClientTest() {
-        String expected = "Client ID: 562373389\nFull name: dan daaan daniliv\nEmail: gmail@com\nPhone: +38475111";
+        String expected = "Client ID: 562373389\nFull name: Ушаков Данило Едуардович\nEmail: dan@gmail.com\nPhone: +380991425632";
         String result = dataBaseSql.showClient(1);
         assertEquals(expected, result);
     }
